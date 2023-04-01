@@ -6,9 +6,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { VscAdd, VscSignIn } from "react-icons/vsc";
 import { api } from "~/utils/api";
-import { LogoButton } from "./components/UI/buttons";
-import { Input } from "./components/UI/inputs";
-import { Title } from "./components/UI/titles";
+import { LogoButton } from "../components/UI/buttons";
+import { Input } from "../components/UI/inputs";
+import { Title } from "../components/UI/titles";
 
 const Home: NextPage = () => {
   const [tournamentName, setTournamentName] = useState<string>();
