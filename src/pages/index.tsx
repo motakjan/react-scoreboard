@@ -1,10 +1,10 @@
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import { type NextPage } from "next";
+import type { NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
-
 import Image from "next/image";
+import { useState } from "react";
 import { VscAdd, VscSignIn } from "react-icons/vsc";
+import { ProfileSkeleton } from "~/components/UI/skeletons";
 import { api } from "~/utils/api";
 import { LogoButton } from "../components/UI/buttons";
 import { Input } from "../components/UI/inputs";
@@ -13,7 +13,7 @@ import { Title } from "../components/UI/titles";
 const Home: NextPage = () => {
   const [tournamentName, setTournamentName] = useState<string>();
   const _hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const { user, isSignedIn } = useUser();
+  const { user, isSignedIn, isLoaded } = useUser();
 
   console.log({ _hello, tournamentName });
 
@@ -33,12 +33,12 @@ const Home: NextPage = () => {
         <link rel="preload" href="/images/bg.jpg" as="image" />
       </Head>
       <main className="flex min-h-screen flex-col bg-hero-pattern bg-cover bg-center">
-        <div className="flex h-16 w-full justify-between bg-black bg-opacity-25 px-8 py-4">
+        <div className="flex h-16 w-full justify-between bg-black/25 px-8 py-4">
           <Image src="/images/logo.svg" alt="logo" width={100} height={30} />
+          {!isLoaded && <ProfileSkeleton />}
           {isSignedIn ? (
             <span className="flex items-center gap-2 font-medium text-white">
-              {user && user.username}
-              <UserButton />
+              <UserButton showName />
             </span>
           ) : (
             <>
@@ -52,7 +52,7 @@ const Home: NextPage = () => {
             </>
           )}
         </div>
-        <div className="flex flex-col gap-3 px-8 py-2 text-white">
+        <div className="flex flex-col gap-3 px-8 py-4 text-white">
           <Title text="Create a league" />
           <Input
             label="League name"

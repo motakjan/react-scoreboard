@@ -3,3 +3,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.cl-userButtonOuterIdentifier {
+  color: white;
+  font-weight: 600;
+}
