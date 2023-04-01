@@ -1,10 +1,4 @@
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
@@ -24,6 +18,8 @@ const Home: NextPage = () => {
   const [tournamentName, setTournamentName] = useState<string>();
   const _hello = api.example.hello.useQuery({ text: "from tRPC" });
   const { user, isSignedIn } = useUser();
+
+  console.log({ _hello, tournamentName });
 
   const handleLeagueNameChange = (
     event: HTMLElementEvent<HTMLInputElement>
@@ -61,7 +57,7 @@ const Home: NextPage = () => {
         <div className="flex flex-col gap-3 px-8 py-2 text-white">
           <Title text="Create a league" />
           <Input
-            label="League Name"
+            label="League name"
             prefix="score.gg/"
             onChange={handleLeagueNameChange}
           />
