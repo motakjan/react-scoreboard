@@ -1,7 +1,7 @@
 import React from "react";
 
 interface InputProps {
-  onChange: (value: any) => void;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
   label: string;
   prefix: string;
 }

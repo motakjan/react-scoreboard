@@ -10,10 +10,6 @@ import { LogoButton } from "./components/UI/buttons";
 import { Input } from "./components/UI/inputs";
 import { Title } from "./components/UI/titles";
 
-export type HTMLElementEvent<T extends HTMLElement> = Event & {
-  target: T;
-};
-
 const Home: NextPage = () => {
   const [tournamentName, setTournamentName] = useState<string>();
   const _hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -22,9 +18,10 @@ const Home: NextPage = () => {
   console.log({ _hello, tournamentName });
 
   const handleLeagueNameChange = (
-    event: HTMLElementEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setTournamentName(event.target.value);
+    const value = event.target.value;
+    setTournamentName(value);
   };
 
   return (
