@@ -30,9 +30,10 @@ const Home: NextPage = () => {
         <title>Score.gg</title>
         <meta name="description" content="Scoreboard application" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preload" href="/images/bg.jpg" as="image" />
       </Head>
       <main className="flex min-h-screen flex-col bg-hero-pattern bg-cover bg-center">
-        <div className="flex w-full justify-between bg-black bg-opacity-25 px-8 py-4">
+        <div className="flex h-16 w-full justify-between bg-black bg-opacity-25 px-8 py-4">
           <Image src="/images/logo.svg" alt="logo" width={100} height={30} />
           {isSignedIn ? (
             <span className="flex items-center gap-2 font-medium text-white">
