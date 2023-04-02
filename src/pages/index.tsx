@@ -2,26 +2,22 @@ import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef } from "react";
 import { VscAdd, VscSignIn } from "react-icons/vsc";
 import { ProfileSkeleton } from "~/components/UI/skeletons";
 import { api } from "~/utils/api";
+import { toSnakeCase } from "~/utils/toSnakeCase";
 import { LogoButton } from "../components/UI/buttons";
 import { Input } from "../components/UI/inputs";
 import { Title } from "../components/UI/titles";
 
 const Home: NextPage = () => {
-  const [tournamentName, setTournamentName] = useState<string>();
-  const _hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const { user, isSignedIn, isLoaded } = useUser();
+  const tournamentNameRef = useRef<HTMLInputElement>(null);
+  const { isSignedIn, isLoaded } = useUser();
+  api.example.hello.useQuery({ text: "from tRPC" });
 
-  console.log({ _hello, tournamentName });
-
-  const handleLeagueNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-    setTournamentName(value);
+  const handleCreateTournament = () => {
+    console.log(toSnakeCase(tournamentNameRef.current?.value as string));
   };
 
   return (
@@ -57,12 +53,15 @@ const Home: NextPage = () => {
           <Input
             label="League name"
             prefix="score.gg/"
-            onChange={handleLeagueNameChange}
+            ref={tournamentNameRef}
           />
           <LogoButton
             text="Create a new league"
             icon={<VscAdd size={20} />}
+            onClick={handleCreateTournament}
             className="mr-2 inline-flex w-fit items-center gap-2 rounded-md bg-red-600  px-3 py-2 text-center text-sm font-medium text-white focus:outline-none"
+            loading={!isLoaded}
+            disabled={!isSignedIn}
           />
         </div>
       </main>
