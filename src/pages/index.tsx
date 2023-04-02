@@ -2,7 +2,9 @@ import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRouter } from "next/router";
+import { useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 import { VscAdd, VscSignIn } from "react-icons/vsc";
 import { ProfileSkeleton } from "~/components/UI/skeletons";
 import { api } from "~/utils/api";
@@ -12,12 +14,29 @@ import { Input } from "../components/UI/inputs";
 import { Title } from "../components/UI/titles";
 
 const Home: NextPage = () => {
+  const [isMutating, setIsMutating] = useState<boolean>(false);
   const tournamentNameRef = useRef<HTMLInputElement>(null);
-  const { isSignedIn, isLoaded } = useUser();
-  api.example.hello.useQuery({ text: "from tRPC" });
+  const router = useRouter();
+  const { user, isSignedIn, isLoaded } = useUser();
+  const createLeague = api.league.create.useMutation({
+    onMutate() {
+      setIsMutating(true);
+    },
+    onSuccess: async (data) => {
+      await router.push(`/league/${data.id}`);
+    },
+    onError: () => {
+      toast.error("League with this name already exists");
+    },
+    onSettled: () => {
+      setIsMutating(false);
+    },
+  });
 
   const handleCreateTournament = () => {
-    console.log(toSnakeCase(tournamentNameRef.current?.value as string));
+    const slug = toSnakeCase(tournamentNameRef.current?.value as string);
+
+    if (user) createLeague.mutate({ slug });
   };
 
   return (
@@ -61,7 +80,7 @@ const Home: NextPage = () => {
             onClick={handleCreateTournament}
             className="mr-2 inline-flex w-fit items-center gap-2 rounded-md bg-red-600  px-3 py-2 text-center text-sm font-medium text-white focus:outline-none"
             loading={!isLoaded}
-            disabled={!isSignedIn}
+            disabled={!isSignedIn || isMutating}
           />
         </div>
       </main>

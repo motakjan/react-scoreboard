@@ -11,8 +11,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model LeaguePlayer {
+    id            String   @id @default(cuid())
+    clerkId       String 
+    mmr           Int      @default(1000)
+    league        League   @relation(fields: [leagueId], references: [id])
+    leagueId      String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@index([leagueId])
 }
+
+model League {
+    id            String   @id @default(cuid())
+    slug          String   @unique
+    ownerClerkId  String 
+    players       LeaguePlayer[]
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
+
