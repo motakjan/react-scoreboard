@@ -4,7 +4,7 @@ import { LoadingSpinner } from "./loading";
 
 type TLogoButton = {
   text: string;
-  icon: JSX.Element;
+  icon?: JSX.Element;
   onClick?: () => void;
   className?: string;
   loading?: boolean;
