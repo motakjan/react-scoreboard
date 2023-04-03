@@ -1,9 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import { useRouter } from "next/router";
 import { Layout } from "~/components/Layout/Layout";
 import { MatchInfo } from "~/components/Matches/Match";
+import { Statistic } from "~/components/Stats/Statistic";
 import { LogoButton } from "~/components/UI/buttons";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
@@ -21,9 +20,6 @@ const players = [
 ];
 
 const League: NextPage = () => {
-  const router = useRouter();
-  const { slug } = router.query;
-
   return (
     <>
       <Head>
@@ -51,26 +47,11 @@ const League: NextPage = () => {
           <div className="max-w-fit">
             <TitleWithSub text="Stats" subtext="League statistics by player" />
             <div className="flex flex-wrap gap-2">
-              <div className="flex w-48 flex-col items-center bg-neutral-900 px-4 py-2">
-                <h1>Winrate</h1>
-                <h2>Jan Motak</h2>
-                <h2 className="text-bold text-3xl">74%</h2>
-              </div>
-              <div className="flex w-48  flex-col items-center bg-neutral-900 px-4 py-2">
-                <h1>GPM</h1>
-                <h2>Jan Motak</h2>
-                <h2 className="text-bold text-3xl">4.3</h2>
-              </div>
-              <div className="flex w-48  flex-col items-center bg-neutral-900 px-4 py-2">
-                <h1>GAPM</h1>
-                <h2>Jan Motak</h2>
-                <h2 className="text-bold text-3xl">0.22</h2>
-              </div>
-              <div className="flex  w-48 flex-col items-center bg-neutral-900 px-4 py-2">
-                <h1>Longest streak</h1>
-                <h2>Jan Motak</h2>
-                <h2 className="text-bold text-3xl">8</h2>
-              </div>
+              <Statistic
+                statName="Winrate"
+                playerName="Jan Motak"
+                score="74%"
+              />
             </div>
           </div>
           <div className="max-w-fit">

@@ -1,17 +1,20 @@
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 
-const links = [
-  { label: "League", href: "/league" },
-  { label: "Players", href: "/players" },
-  { label: "Tournaments", href: "/tournaments" },
-];
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const { slug } = router.query;
+
+  const links = [
+    { label: "League", href: `/league/${slug as string}` },
+    { label: "Players", href: `/league/players/${slug as string}` },
+    { label: "Tournaments", href: `/league/tournaments/${slug as string}` },
+  ];
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
