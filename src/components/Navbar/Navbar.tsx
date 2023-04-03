@@ -12,8 +12,8 @@ const Navbar = () => {
 
   const links = [
     { label: "League", href: `/league/${slug as string}` },
-    { label: "Players", href: `/league/players/${slug as string}` },
-    { label: "Tournaments", href: `/league/tournaments/${slug as string}` },
+    { label: "Players", href: `/players/${slug as string}` },
+    { label: "Tournaments", href: `/tournaments/${slug as string}` },
   ];
 
   const handleToggle = () => {
