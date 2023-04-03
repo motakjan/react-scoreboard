@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         "skeleton-black": "#1E1E1E",
+        layout: "#0e0e0e",
       },
       backgroundImage: {
         "hero-pattern":
