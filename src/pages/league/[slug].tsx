@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Layout } from "~/components/Layout/Layout";
+import { MatchInfo } from "~/components/Matches/Match";
 import { LogoButton } from "~/components/UI/buttons";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
@@ -48,44 +49,51 @@ const League: NextPage = () => {
             </div>
           </div>
           <div className="max-w-fit">
+            <TitleWithSub text="Stats" subtext="League statistics by player" />
+            <div className="flex flex-wrap gap-2">
+              <div className="flex w-48 flex-col items-center bg-neutral-900 px-4 py-2">
+                <h1>Winrate</h1>
+                <h2>Jan Motak</h2>
+                <h2 className="text-bold text-3xl">74%</h2>
+              </div>
+              <div className="flex w-48  flex-col items-center bg-neutral-900 px-4 py-2">
+                <h1>GPM</h1>
+                <h2>Jan Motak</h2>
+                <h2 className="text-bold text-3xl">4.3</h2>
+              </div>
+              <div className="flex w-48  flex-col items-center bg-neutral-900 px-4 py-2">
+                <h1>GAPM</h1>
+                <h2>Jan Motak</h2>
+                <h2 className="text-bold text-3xl">0.22</h2>
+              </div>
+              <div className="flex  w-48 flex-col items-center bg-neutral-900 px-4 py-2">
+                <h1>Longest streak</h1>
+                <h2>Jan Motak</h2>
+                <h2 className="text-bold text-3xl">8</h2>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-fit">
             <TitleWithSub text="Matches" subtext="Latest matches played" />
             <div className="flex flex-col gap-2">
-              <div className="flex w-96 flex-col gap-2 rounded-md bg-neutral-900 px-4 py-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1>Jan Motak</h1>
-                    <h2 className="text-sm">Home</h2>
-                  </div>
-
-                  <h1 className="text-4xl">4</h1>
-                </div>
-                <div className="flex items-center justify-between text-neutral-500">
-                  <div>
-                    <h1>Petr Pavel</h1>
-                    <h2 className="text-sm">Away</h2>
-                  </div>
-
-                  <h1 className="text-4xl">0</h1>
-                </div>
-              </div>
-              <div className="flex w-96 flex-col gap-2 rounded-md bg-neutral-900 px-4 py-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1>Jan Motak</h1>
-                    <h2 className="text-sm">Home</h2>
-                  </div>
-
-                  <h1 className="text-4xl">2</h1>
-                </div>
-                <div className="flex items-center justify-between text-neutral-500">
-                  <div>
-                    <h1>Petr Pavel</h1>
-                    <h2 className="text-sm">Away</h2>
-                  </div>
-
-                  <h1 className="text-4xl">1</h1>
-                </div>
-              </div>
+              <MatchInfo
+                homePlayer="Jan Motak"
+                homeScore={3}
+                awayPlayer="Petr Pavel"
+                awayScore={2}
+              />
+              <MatchInfo
+                homePlayer="Jan Motak"
+                homeScore={1}
+                awayPlayer="Mike Smith"
+                awayScore={2}
+              />
+              <MatchInfo
+                homePlayer="Peter Johnes"
+                homeScore={0}
+                awayPlayer="Jan Motak"
+                awayScore={2}
+              />
             </div>
           </div>
         </div>
