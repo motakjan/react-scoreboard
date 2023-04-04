@@ -1,21 +1,28 @@
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { type FieldValues, type SubmitHandler, useForm } from "react-hook-form";
 
-type FormValues = {
-  name: string;
-  mmr: number;
+type CreatePlayerFormProps = {
+  onSubmit: SubmitHandler<FieldValues>;
 };
 
-function MyForm() {
+export const CreatePlayerForm: React.FC<CreatePlayerFormProps> = ({
+  onSubmit,
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>();
+  } = useForm();
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => console.log(data);
+  const handleFormSubmit: SubmitHandler<FieldValues> = (
+    data: FieldValues,
+    event?: React.BaseSyntheticEvent
+  ) => {
+    event?.preventDefault();
+    onSubmit(data);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div>
         <label htmlFor="name">Name</label>
         <input type="text" {...register("name", { required: true })} />
@@ -40,6 +47,4 @@ function MyForm() {
       <button type="submit">Submit</button>
     </form>
   );
-}
-
-export default MyForm;
+};

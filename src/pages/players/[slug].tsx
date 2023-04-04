@@ -1,25 +1,19 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import { Layout } from "~/components/Layout/Layout";
 import { LogoButton } from "~/components/UI/buttons";
-import MyForm from "~/components/UI/forms";
+import { CreatePlayerForm } from "~/components/UI/forms";
 import Modal from "~/components/UI/modals";
 import { TitleWithSub } from "~/components/UI/titles";
 
 const Players: NextPage = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const onSubmit = (event: InputEvent, data: any) => {
-    event.preventDefault();
+
+  const handleCreatePlayer = (data: FieldValues) => {
     console.log(data);
   };
-  console.log(errors);
 
   return (
     <>
@@ -48,7 +42,7 @@ const Players: NextPage = () => {
         />
         {isOpen && (
           <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-            <MyForm />
+            <CreatePlayerForm onSubmit={handleCreatePlayer} />
           </Modal>
         )}
       </Layout>
