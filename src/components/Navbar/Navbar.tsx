@@ -25,7 +25,13 @@ const Navbar = () => {
       <div className=" w-full px-16">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Image src="/images/logo.svg" alt="logo" width={100} height={30} />
+            <Image
+              src="/images/logo.svg"
+              alt="logo"
+              width={100}
+              height={30}
+              loading="lazy"
+            />
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">

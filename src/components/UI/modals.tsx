@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { VscClose } from "react-icons/vsc";
+import { IconButton } from "./buttons";
 
 type ModalProps = {
   isOpen: boolean;
@@ -22,14 +24,13 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
     <div
       className={`fixed inset-0 bg-neutral-950 bg-opacity-50 backdrop-blur-[2px] transition-opacity ${opacity} ${pointerEvents}`}
     >
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-md bg-neutral-900 p-6 text-white shadow-sm">
-        {children}
-        <button
-          className="mt-4 w-full rounded bg-blue-500 px-4 py-2 text-center font-bold text-white hover:bg-blue-600"
+      <div className="fixed left-1/2 top-1/2 flex w-4/5 -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-md bg-neutral-900 p-6 text-white shadow-sm sm:w-96">
+        <IconButton
+          icon={<VscClose size={20} />}
           onClick={handleClose}
-        >
-          Close
-        </button>
+          className="ml-auto"
+        />
+        {children}
       </div>
     </div>
   );

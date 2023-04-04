@@ -1,7 +1,13 @@
-import { type FieldValues, type SubmitHandler, useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { LogoButton } from "./buttons";
 
 type CreatePlayerFormProps = {
-  onSubmit: SubmitHandler<FieldValues>;
+  onSubmit: SubmitHandler<CreatePlayerValues>;
+};
+
+export type CreatePlayerValues = {
+  mmr: string;
+  name: string;
 };
 
 export const CreatePlayerForm: React.FC<CreatePlayerFormProps> = ({
@@ -11,10 +17,10 @@ export const CreatePlayerForm: React.FC<CreatePlayerFormProps> = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<CreatePlayerValues>();
 
-  const handleFormSubmit: SubmitHandler<FieldValues> = (
-    data: FieldValues,
+  const handleFormSubmit: SubmitHandler<CreatePlayerValues> = (
+    data: CreatePlayerValues,
     event?: React.BaseSyntheticEvent
   ) => {
     event?.preventDefault();
@@ -22,29 +28,67 @@ export const CreatePlayerForm: React.FC<CreatePlayerFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <div>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <label htmlFor="name">Name</label>
-        <input type="text" {...register("name", { required: true })} />
-        {errors.name && <span>This field is required</span>}
+        <input
+          className="rounded-md bg-neutral-800 px-3 py-2"
+          type="text"
+          placeholder="players first and last name"
+          {...register("name", { required: true })}
+        />
+        <span
+          className={`ml-[2px] text-xs text-red-600 ${
+            errors.name ? "visible" : "invisible"
+          }`}
+        >
+          This field is required
+        </span>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-1">
         <label htmlFor="mmr">MMR</label>
         <input
+          className="rounded-md bg-neutral-800 px-3 py-2"
           type="number"
-          {...register("mmr", { required: true, min: 0, max: 10000 })}
+          defaultValue={1000}
+          placeholder="player mmr (default 1000)"
+          {...register("mmr", { required: true, min: 0, max: 8000 })}
         />
-        {errors.mmr?.type === "required" && <span>This field is required</span>}
+        {errors.mmr?.type === "required" && (
+          <span
+            className={`ml-[2px] text-xs text-red-600 ${
+              errors.mmr ? "visible" : "invisible"
+            }`}
+          >
+            This field is required
+          </span>
+        )}
         {errors.mmr?.type === "min" && (
-          <span>MMR must be greater than or equal to 0</span>
+          <span
+            className={`ml-[2px] text-xs text-red-600 ${
+              errors.mmr ? "visible" : "invisible"
+            }`}
+          >
+            MMR must be greater than or equal to 0
+          </span>
         )}
         {errors.mmr?.type === "max" && (
-          <span>MMR must be less than or equal to 10000</span>
+          <span
+            className={`ml-[2px] text-xs text-red-600 ${
+              errors.mmr ? "visible" : "invisible"
+            }`}
+          >
+            MMR must be less than or equal to 8000
+          </span>
         )}
       </div>
 
-      <button type="submit">Submit</button>
+      <LogoButton
+        text="Create player"
+        type="submit"
+        className="ml-auto mt-4 w-28 rounded-md bg-red-600 px-2 py-2 text-sm"
+      />
     </form>
   );
 };

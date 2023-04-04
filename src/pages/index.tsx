@@ -49,7 +49,13 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col bg-hero-pattern bg-cover bg-center">
         <div className="flex h-16 w-full justify-between bg-black/25 px-8 py-4">
-          <Image src="/images/logo.svg" alt="logo" width={100} height={30} />
+          <Image
+            src="/images/logo.svg"
+            alt="logo"
+            width={100}
+            height={30}
+            loading="lazy"
+          />
           {!isLoaded && <ProfileSkeleton />}
           {isSignedIn ? (
             <span className="flex items-center gap-2 font-medium text-white">

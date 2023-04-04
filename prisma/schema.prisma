@@ -11,9 +11,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model LeaguePlayer {
+model Player {
     id            String   @id @default(cuid())
-    clerkId       String 
+    name          String 
     mmr           Int      @default(1000)
     league        League   @relation(fields: [leagueId], references: [id])
     leagueId      String
@@ -27,7 +27,7 @@ model League {
     id            String   @id @default(cuid())
     slug          String   @unique
     ownerClerkId  String 
-    players       LeaguePlayer[]
+    players       Player[]
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 }
