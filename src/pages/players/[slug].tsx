@@ -2,8 +2,9 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { VscEdit } from "react-icons/vsc";
 import { Layout } from "~/components/Layout/Layout";
-import { LogoButton } from "~/components/UI/buttons";
+import { IconButton, LogoButton } from "~/components/UI/buttons";
 import {
   CreatePlayerForm,
   type CreatePlayerValues,
@@ -47,6 +48,8 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
     leagueId,
   });
 
+  if (!players) return <div>Error while creating this page...</div>;
+
   const handleCreatePlayer = (playerData: CreatePlayerValues) => {
     createPlayer.mutate({
       leagueId,
@@ -64,7 +67,7 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
       </Head>
       <Layout>
         <TitleWithSub text="Players" subtext="Manage league players" />
-        <div className="mb-4 grid grid-flow-row-dense grid-cols-3 gap-x-2 gap-y-3">
+        <div className="mb-4 grid grid-flow-row-dense grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 lg:grid-cols-4">
           {players?.map((player) => (
             <div
               key={`player_card_${player.id}`}
@@ -72,6 +75,11 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
             >
               {player.name}
               <span className="text-xs text-neutral-600">({player.mmr})</span>
+              <IconButton
+                icon={<VscEdit size={14} />}
+                className="ml-auto"
+                onClick={() => console.log("click")}
+              />
             </div>
           ))}
         </div>
@@ -84,6 +92,7 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
           <Modal
             isOpen={isAddPlayerOpen}
             onClose={() => setIsAddPlayerOpen(false)}
+            title="Create new player"
           >
             <CreatePlayerForm onSubmit={handleCreatePlayer} />
           </Modal>

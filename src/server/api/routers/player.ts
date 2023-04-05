@@ -36,6 +36,7 @@ export const playerRouter = createTRPCRouter({
 
       return player;
     }),
+
   getPlayersByLeagueId: publicProcedure
     .input(z.object({ leagueId: z.string() }))
     .query(async ({ ctx, input }) => {
