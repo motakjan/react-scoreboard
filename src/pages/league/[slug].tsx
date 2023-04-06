@@ -26,7 +26,6 @@ const League: NextPage = () => {
         <title>Score.gg</title>
         <meta name="description" content="Scoreboard application" />
         <link rel="icon" href="/favicon.ico" />
-        <link rel="preload" href="/images/bg.jpg" as="image" />
       </Head>
       <Layout>
         <div className="flex justify-between">
