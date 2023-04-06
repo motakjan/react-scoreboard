@@ -36,6 +36,42 @@ export const playerRouter = createTRPCRouter({
 
       return player;
     }),
+  update: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        mmr: z.number().min(0).max(8000),
+        name: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const player = await ctx.prisma.player.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          mmr: input.mmr,
+        },
+      });
+
+      if (!player) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Player not found",
+        });
+      }
+
+      return player;
+    }),
+  delete: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const player = await ctx.prisma.player.update({
+        where: { id: input.id },
+        data: { deleted: true },
+      });
+
+      return player;
+    }),
 
   getPlayersByLeagueId: publicProcedure
     .input(z.object({ leagueId: z.string() }))
@@ -52,7 +88,7 @@ export const playerRouter = createTRPCRouter({
       }
 
       const players = ctx.prisma.player.findMany({
-        where: { leagueId: input.leagueId },
+        where: { leagueId: input.leagueId, deleted: false },
       });
 
       return players;

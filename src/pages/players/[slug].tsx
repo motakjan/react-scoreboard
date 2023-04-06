@@ -2,13 +2,10 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { VscEdit } from "react-icons/vsc";
+import { VscEdit, VscTrash } from "react-icons/vsc";
 import { Layout } from "~/components/Layout/Layout";
 import { IconButton, LogoButton } from "~/components/UI/buttons";
-import {
-  CreatePlayerForm,
-  type CreatePlayerValues,
-} from "~/components/UI/forms";
+import { PlayerForm, type PlayerValues } from "~/components/UI/forms";
 import Modal from "~/components/UI/modals";
 import { TitleWithSub } from "~/components/UI/titles";
 import { api } from "~/utils/api";
@@ -19,28 +16,73 @@ type PlayersPageProps = {
 };
 
 const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
-  const [isAddPlayerOpen, setIsAddPlayerOpen] = useState<boolean>(false);
-  const [creatingToastId, setCreatingToastId] = useState<string>("");
+  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
+  const [toastId, setToastId] = useState<string>("");
+  const [editedPlayerId, setEditedPlayerId] = useState<string>("");
   const ctx = api.useContext();
-  const createPlayer = api.player.create.useMutation({
+
+  const updatePlayer = api.player.update.useMutation({
     onMutate() {
-      const toastId = toast.loading("Creating a new player...");
-      setCreatingToastId(toastId);
+      const toastId = toast.loading("Updating a player...");
+      setToastId(toastId);
     },
     onSuccess: () => {
-      toast.success("New player created", {
-        id: creatingToastId,
+      toast.success("Player successfully updated", {
+        id: toastId,
       });
       void ctx.player.getPlayersByLeagueId.invalidate();
-      setIsAddPlayerOpen(false);
+      setIsPlayerModalOpen(false);
     },
     onError: () => {
-      toast.error("Error while creating a new player", {
-        id: creatingToastId,
+      toast.error("Error while updating player", {
+        id: toastId,
       });
     },
     onSettled: () => {
-      setCreatingToastId("");
+      setToastId("");
+    },
+  });
+
+  const createPlayer = api.player.create.useMutation({
+    onMutate() {
+      const toastId = toast.loading("Creating a new player...");
+      setToastId(toastId);
+    },
+    onSuccess: () => {
+      toast.success("New player created", {
+        id: toastId,
+      });
+      void ctx.player.getPlayersByLeagueId.invalidate();
+      setIsPlayerModalOpen(false);
+    },
+    onError: () => {
+      toast.error("Error while creating a new player", {
+        id: toastId,
+      });
+    },
+    onSettled: () => {
+      setToastId("");
+    },
+  });
+
+  const deletePlayer = api.player.delete.useMutation({
+    onMutate() {
+      const toastId = toast.loading("Deleting a player...");
+      setToastId(toastId);
+    },
+    onSuccess: () => {
+      toast.success("Player deleted", {
+        id: toastId,
+      });
+      void ctx.player.getPlayersByLeagueId.invalidate();
+    },
+    onError: () => {
+      toast.error("Error while deleting a player", {
+        id: toastId,
+      });
+    },
+    onSettled: () => {
+      setToastId("");
     },
   });
 
@@ -50,12 +92,39 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
 
   if (!players) return <div>Error while creating this page...</div>;
 
-  const handleCreatePlayer = (playerData: CreatePlayerValues) => {
+  const handleCreatePlayer = (playerData: PlayerValues) => {
     createPlayer.mutate({
       leagueId,
       name: playerData.name,
       mmr: parseInt(playerData.mmr),
     });
+  };
+
+  const handleUpdatePlayer = (playerData: PlayerValues) => {
+    if (!playerData.id) {
+      toast.error("Error while updating player");
+      return;
+    }
+
+    updatePlayer.mutate({
+      id: playerData.id,
+      mmr: +playerData.mmr,
+      name: playerData.name,
+    });
+  };
+
+  const handleDeletePlayer = (playerId: string) => {
+    deletePlayer.mutate({ id: playerId });
+  };
+
+  const handleEditPlayerClick = (playerId: string) => {
+    setIsPlayerModalOpen(true);
+    setEditedPlayerId(playerId);
+  };
+
+  const handleAddPlayerClick = () => {
+    setEditedPlayerId("");
+    setIsPlayerModalOpen(true);
   };
 
   return (
@@ -75,26 +144,40 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
             >
               {player.name}
               <span className="text-xs text-neutral-600">({player.mmr})</span>
-              <IconButton
-                icon={<VscEdit size={14} />}
-                className="ml-auto"
-                onClick={() => console.log("click")}
-              />
+              <span className="ml-auto flex gap-1">
+                <IconButton
+                  icon={<VscEdit size={16} />}
+                  onClick={() => handleEditPlayerClick(player.id)}
+                />
+                <IconButton
+                  icon={<VscTrash size={16} className="text-red-500" />}
+                  onClick={() => handleDeletePlayer(player.id)}
+                />
+              </span>
             </div>
           ))}
         </div>
         <LogoButton
           text="Add player"
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
-          onClick={() => setIsAddPlayerOpen(true)}
+          onClick={() => handleAddPlayerClick()}
         />
-        {isAddPlayerOpen && (
+        {isPlayerModalOpen && (
           <Modal
-            isOpen={isAddPlayerOpen}
-            onClose={() => setIsAddPlayerOpen(false)}
-            title="Create new player"
+            isOpen={isPlayerModalOpen}
+            onClose={() => setIsPlayerModalOpen(false)}
+            title={editedPlayerId === "" ? "Create new player" : "Edit player"}
           >
-            <CreatePlayerForm onSubmit={handleCreatePlayer} />
+            {editedPlayerId === "" ? (
+              <PlayerForm onSubmit={handleCreatePlayer} />
+            ) : (
+              <PlayerForm
+                onSubmit={handleUpdatePlayer}
+                players={players}
+                editedPlayerId={editedPlayerId}
+                isEditMode
+              />
+            )}
           </Modal>
         )}
       </Layout>
