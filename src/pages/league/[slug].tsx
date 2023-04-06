@@ -1,25 +1,27 @@
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { Layout } from "~/components/Layout/Layout";
 import { MatchInfo } from "~/components/Matches/Match";
 import { Statistic } from "~/components/Stats/Statistic";
 import { LogoButton } from "~/components/UI/buttons";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
+import { api } from "~/utils/api";
+import { generateSSGHelper } from "~/utils/ssgHelper";
 
-const players = [
-  "Jan Motak",
-  "Pavel Martin",
-  "Petr Pavel",
-  "Pavel Martin",
-  "Petr Pavel",
-  "Pavel Martin",
-  "Petr Pavel",
-  "Pavel Martin",
-  "Petr Pavel",
-];
+type LeaguePageProps = {
+  leagueId: string;
+};
 
-const League: NextPage = () => {
+const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
+  const router = useRouter();
+  const { data: league } = api.league.getLeagueInfo.useQuery({
+    leagueId,
+  });
+
+  if (!league) return <div>Error while fetching league data</div>;
+
   return (
     <>
       <Head>
@@ -31,14 +33,15 @@ const League: NextPage = () => {
         <div className="flex justify-between">
           <div className="max-w-fit">
             <TitleWithSub text="Standings" subtext="League player standings" />
-            <StandingsTable players={players} />
+            <StandingsTable players={league?.players} />
             <div className="ml-auto mt-2 flex gap-2">
               <LogoButton
                 text="Manage players"
                 className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+                onClick={() => router.push(`/players/${leagueId}`)}
               />
               <LogoButton
-                text="Create tournament"
+                text="Add Match"
                 className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
               />
             </div>
@@ -80,6 +83,27 @@ const League: NextPage = () => {
       </Layout>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const ssg = generateSSGHelper();
+
+  const slug = context.params?.slug;
+
+  if (typeof slug !== "string") throw new Error("No slug");
+
+  await ssg.league.getLeagueInfo.prefetch({ leagueId: slug });
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+      leagueId: slug,
+    },
+  };
+};
+
+export const getStaticPaths = () => {
+  return { paths: [], fallback: "blocking" };
 };
 
 export default League;

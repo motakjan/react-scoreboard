@@ -1,6 +1,6 @@
+import type { Player } from "@prisma/client";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { LogoButton } from "./buttons";
-import type { Player } from "@prisma/client";
 
 type PlayerFormProps = {
   onSubmit: SubmitHandler<PlayerValues>;
@@ -36,8 +36,6 @@ export const PlayerForm: React.FC<PlayerFormProps> = ({
   };
 
   const player = players?.find((player) => player.id === editedPlayerId);
-
-  console.log(isEditMode ? "edit" : "create");
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">

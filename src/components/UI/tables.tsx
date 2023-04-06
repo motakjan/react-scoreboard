@@ -1,7 +1,8 @@
+import { type Player } from "@prisma/client";
 import React from "react";
 
 type StandingsTableProps = {
-  players: string[];
+  players: Player[];
 };
 
 export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
@@ -30,7 +31,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
         <tbody>
           {players.map((player) => (
             <tr
-              key={player}
+              key={`standings_${player.id}`}
               className="border-b bg-white dark:border-neutral-900 dark:bg-neutral-800"
             >
               <td className="px-6 py-2">1</td>
@@ -38,12 +39,12 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
                 scope="row"
                 className="flex gap-2 whitespace-nowrap px-6 py-2 font-medium text-gray-900 dark:text-white"
               >
-                {player}
+                {player.name}
               </th>
               <td className="px-6 py-2">10/5/2/1</td>
               <td className="px-6 py-2">50-18</td>
               <td className="text-ellipsis-white px-6 py-2 font-semibold text-white">
-                1000
+                {player.mmr}
               </td>
             </tr>
           ))}
