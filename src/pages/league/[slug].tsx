@@ -51,7 +51,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const league = data?.league;
   const stats = data?.stats;
 
-  if (!league) return <div>Error while fetching league data</div>;
+  if (!league || !stats) return <div>Error while fetching league data</div>;
 
   const handleCreateMatch = (matchData: MatchValues) => {
     createMatch.mutate({
@@ -72,7 +72,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
       </Head>
       <Layout>
         <div className="flex flex-col justify-between xl:flex-row">
-          <div className="py-2 pr-4">
+          <div className="py-2 lg:pr-4">
             <TitleWithSub text="Standings" subtext="League player standings" />
             <StandingsTable players={league?.players} />
             <div className="ml-auto mt-2 flex gap-2">
@@ -88,20 +88,27 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
               />
             </div>
           </div>
-          <div className="py-2 md:px-4">
+          <div className="py-2 lg:px-4">
             <TitleWithSub text="Stats" subtext="League statistics by player" />
             <div className="flex flex-wrap gap-2">
-              {stats?.map((stat) => (
-                <Statistic
-                  key={`${stat.name}`}
-                  statName={stat.name}
-                  playerName={stat.player?.name || ""}
-                  score={stat.stat}
-                />
-              ))}
+              {stats.length > 0 ? (
+                stats.map((stat) => (
+                  <Statistic
+                    key={`${stat.name}`}
+                    statName={stat.name}
+                    playerName={stat.player?.name || ""}
+                    score={stat.stat}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-neutral-200">
+                  No data yet at least one player has to play more than three
+                  matches for stats to show
+                </div>
+              )}
             </div>
           </div>
-          <div className="py-2 md:w-96 md:px-4">
+          <div className="py-2 md:w-96 lg:px-4">
             <TitleWithSub text="Matches" subtext="Latest matches played" />
             <div className="flex flex-col gap-2">
               {league.matches.slice(0, 5).map((match) => (

@@ -55,12 +55,8 @@ export const leagueRouter = createTRPCRouter({
         });
       }
 
-      if (league.matches.length > 0) {
-        const stats: LeagueStats[] = getLeagueStats(league);
+      const stats: LeagueStats[] = getLeagueStats(league);
 
-        return { league, stats };
-      }
-
-      return { league };
+      return { league, stats };
     }),
 });

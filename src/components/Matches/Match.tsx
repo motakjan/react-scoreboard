@@ -18,32 +18,36 @@ export const MatchInfo: React.FC<MatchInfoProps> = ({
   const hasHomeWon = homeScore > awayScore;
 
   return (
-    <div className="flex flex-col gap-2 rounded-md bg-neutral-900 px-4 py-2 md:w-96">
-      <div
-        className={`flex items-center justify-between ${
-          hasHomeWon ? "" : "text-neutral-500"
-        }`}
-      >
-        <div>
-          <h1>{homePlayer}</h1>
-          <h2 className="text-sm">Home</h2>
-        </div>
+    <div className="flex items-center gap-2 rounded-md bg-neutral-900 px-4 py-2 md:w-96">
+      <div className="flex w-full flex-col">
+        <div
+          className={`flex items-center justify-between ${
+            hasHomeWon ? "" : "text-neutral-500"
+          }`}
+        >
+          <div>
+            <h1>{homePlayer}</h1>
+            <h2 className="text-sm">Home</h2>
+          </div>
 
-        <h1 className="text-4xl">{homeScore}</h1>
-      </div>
-      <div
-        className={`flex items-center justify-between ${
-          hasHomeWon ? "text-neutral-500" : ""
-        }`}
-      >
-        <div>
-          <h1>{awayPlayer}</h1>
-          <h2 className="text-sm">Away</h2>
+          <h1 className="text-4xl">{homeScore}</h1>
         </div>
+        <div
+          className={`flex items-center justify-between ${
+            hasHomeWon ? "text-neutral-500" : ""
+          }`}
+        >
+          <div>
+            <h1>{awayPlayer}</h1>
+            <h2 className="text-sm">Away</h2>
+          </div>
 
-        <h1 className="text-4xl">{awayScore}</h1>
+          <h1 className="text-4xl">{awayScore}</h1>
+        </div>
       </div>
-      {overtime ? <h2 className="text-xs text-neutral-200">OT</h2> : null}
+      <h2 className="border-l-2 border-blue-500 py-4 pl-4 text-lg text-neutral-200">
+        {overtime ? "OT" : "FT"}
+      </h2>
     </div>
   );
 };
