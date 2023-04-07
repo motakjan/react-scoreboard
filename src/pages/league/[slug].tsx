@@ -1,8 +1,9 @@
+import { SignedIn, useUser } from "@clerk/nextjs";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { RiPlayListAddLine } from "react-icons/ri";
 import { Layout } from "~/components/Layout/Layout";
@@ -23,7 +24,13 @@ type LeaguePageProps = {
 
 const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const [isMatchModalOpen, setIsMatchModalOpen] = useState<boolean>(false);
+  const [userWatchlist, setUserWatchlist] = useState<string[]>([]);
   const [toastId, setToastId] = useState<string>("");
+  const { user } = useUser();
+  const leagues = useMemo(
+    () => user?.publicMetadata?.leagues || [],
+    [user?.publicMetadata?.leagues]
+  );
   const ctx = api.useContext();
   const router = useRouter();
   const createMatch = api.match.create.useMutation({
@@ -46,6 +53,36 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
       });
     },
   });
+
+  const setWatchlist = api.user.setWatchlist.useMutation({
+    onMutate() {
+      const toastId = toast.loading("Processing request...");
+      setToastId(toastId);
+    },
+    onSettled: () => {
+      setToastId("");
+    },
+    onSuccess: (data) => {
+      toast.success("Watchlist edited", {
+        id: toastId,
+      });
+      setUserWatchlist(data);
+    },
+    onError: () => {
+      toast.error("Error while editing watchlist", {
+        id: toastId,
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (Array.isArray(leagues)) {
+      setUserWatchlist(leagues);
+    }
+
+    console.log("rerender");
+  }, [leagues]);
+
   const { data } = api.league.getLeagueInfo.useQuery({
     leagueId,
   });
@@ -65,6 +102,24 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
     setIsMatchModalOpen(false);
   };
 
+  const handleWatchLeague = () => {
+    if (!user) return;
+    setWatchlist.mutate({
+      userId: user.id,
+      leagues: userWatchlist ? [...userWatchlist, leagueId] : [leagueId],
+    });
+  };
+
+  const handleUnwatchLeague = () => {
+    if (!user) return;
+    setWatchlist.mutate({
+      userId: user.id,
+      leagues: userWatchlist
+        ? userWatchlist.filter((league) => league !== leagueId)
+        : [],
+    });
+  };
+
   return (
     <>
       <Head>
@@ -77,12 +132,23 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
           <h1 className="text-2xl font-semibold">
             {snakeToNormal(league.slug)}
           </h1>
-          <LogoButton
-            text="WATCH"
-            icon={<RiPlayListAddLine size={14} />}
-            className="flex items-center gap-2 rounded-full border-2 border-blue-700 bg-blue-600/20 px-4 py-1 text-xs hover:bg-blue-600/40"
-            onClick={() => setIsMatchModalOpen(true)}
-          />
+          <SignedIn>
+            {userWatchlist?.includes(league.id) ? (
+              <LogoButton
+                text="UNWATCH"
+                icon={<RiPlayListAddLine size={14} />}
+                className="flex items-center gap-2 rounded-full border-2 border-red-700 bg-red-600/20 px-4 py-1 text-xs hover:bg-red-600/40"
+                onClick={handleUnwatchLeague}
+              />
+            ) : (
+              <LogoButton
+                text="WATCH"
+                icon={<RiPlayListAddLine size={14} />}
+                className="flex items-center gap-2 rounded-full border-2 border-blue-700 bg-blue-600/20 px-4 py-1 text-xs hover:bg-blue-600/40"
+                onClick={handleWatchLeague}
+              />
+            )}
+          </SignedIn>
         </div>
 
         <div className="flex flex-col justify-between xl:flex-row">
