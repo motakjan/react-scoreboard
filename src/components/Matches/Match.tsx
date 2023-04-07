@@ -5,6 +5,7 @@ type MatchInfoProps = {
   awayPlayer: string;
   homeScore: number;
   awayScore: number;
+  overtime: boolean;
 };
 
 export const MatchInfo: React.FC<MatchInfoProps> = ({
@@ -12,6 +13,7 @@ export const MatchInfo: React.FC<MatchInfoProps> = ({
   awayPlayer,
   homeScore,
   awayScore,
+  overtime,
 }) => {
   const hasHomeWon = homeScore > awayScore;
 
@@ -41,6 +43,7 @@ export const MatchInfo: React.FC<MatchInfoProps> = ({
 
         <h1 className="text-4xl">{awayScore}</h1>
       </div>
+      {overtime ? <h2 className="text-xs text-neutral-200">OT</h2> : null}
     </div>
   );
 };

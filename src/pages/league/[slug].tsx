@@ -1,10 +1,15 @@
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { Layout } from "~/components/Layout/Layout";
 import { MatchInfo } from "~/components/Matches/Match";
 import { Statistic } from "~/components/Stats/Statistic";
 import { LogoButton } from "~/components/UI/buttons";
+import { MatchForm, type MatchValues } from "~/components/UI/forms";
+import Modal from "~/components/UI/modals";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
 import { api } from "~/utils/api";
@@ -15,12 +20,45 @@ type LeaguePageProps = {
 };
 
 const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState<boolean>(false);
+  const [toastId, setToastId] = useState<string>("");
+  const ctx = api.useContext();
   const router = useRouter();
+  const createMatch = api.match.create.useMutation({
+    onMutate() {
+      const toastId = toast.loading("Processing request...");
+      setToastId(toastId);
+    },
+    onSettled: () => {
+      setToastId("");
+    },
+    onSuccess: () => {
+      toast.success("New match created", {
+        id: toastId,
+      });
+      void ctx.league.getLeagueInfo.invalidate();
+    },
+    onError: () => {
+      toast.error("Error while creating a new match", {
+        id: toastId,
+      });
+    },
+  });
   const { data: league } = api.league.getLeagueInfo.useQuery({
     leagueId,
   });
 
   if (!league) return <div>Error while fetching league data</div>;
+
+  const handleCreateMatch = (matchData: MatchValues) => {
+    createMatch.mutate({
+      ...matchData,
+      homeScore: +matchData.homeScore,
+      awayScore: +matchData.awayScore,
+      leagueId,
+    });
+    setIsMatchModalOpen(false);
+  };
 
   return (
     <>
@@ -43,6 +81,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
               <LogoButton
                 text="Add Match"
                 className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+                onClick={() => setIsMatchModalOpen(true)}
               />
             </div>
           </div>
@@ -59,27 +98,34 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
           <div className="max-w-fit">
             <TitleWithSub text="Matches" subtext="Latest matches played" />
             <div className="flex flex-col gap-2">
-              <MatchInfo
-                homePlayer="Jan Motak"
-                homeScore={3}
-                awayPlayer="Petr Pavel"
-                awayScore={2}
-              />
-              <MatchInfo
-                homePlayer="Jan Motak"
-                homeScore={1}
-                awayPlayer="Mike Smith"
-                awayScore={2}
-              />
-              <MatchInfo
-                homePlayer="Peter Johnes"
-                homeScore={0}
-                awayPlayer="Jan Motak"
-                awayScore={2}
-              />
+              {league.matches.slice(0, 5).map((match) => (
+                <MatchInfo
+                  key={`match_${match.id}`}
+                  homePlayer={match.homePlayer.name}
+                  homeScore={match.homeScore}
+                  awayPlayer={match.awayPlayer.name}
+                  awayScore={match.awayScore}
+                  overtime={match.overtime}
+                />
+              ))}
+              <Link
+                href={`/matches/${leagueId}`}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                For more results visit match history page
+              </Link>
             </div>
           </div>
         </div>
+        {isMatchModalOpen && (
+          <Modal
+            isOpen={isMatchModalOpen}
+            onClose={() => setIsMatchModalOpen(false)}
+            title="Add Match"
+          >
+            <MatchForm onSubmit={handleCreateMatch} players={league.players} />
+          </Modal>
+        )}
       </Layout>
     </>
   );

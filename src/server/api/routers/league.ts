@@ -26,6 +26,23 @@ export const leagueRouter = createTRPCRouter({
           players: {
             orderBy: { mmr: "desc" },
             where: { deleted: false },
+            include: {
+              matchesAsHomePlayer: true,
+              matchesAsAwayPlayer: true,
+            },
+          },
+          matches: {
+            orderBy: { createdAt: "desc" },
+            include: {
+              homePlayer: true,
+              awayPlayer: true,
+            },
+            where: {
+              OR: [
+                { homePlayer: { deleted: false } },
+                { awayPlayer: { deleted: false } },
+              ],
+            },
           },
         },
       });
