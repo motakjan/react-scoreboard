@@ -14,6 +14,7 @@ import { MatchForm, type MatchValues } from "~/components/UI/forms";
 import Modal from "~/components/UI/modals";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
+import { useMatchMutations } from "~/hooks/useMatchMutations";
 import { api } from "~/utils/api";
 import { generateSSGHelper } from "~/utils/ssgHelper";
 import { snakeToNormal } from "~/utils/toSnakeCase";
@@ -24,35 +25,16 @@ type LeaguePageProps = {
 
 const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const [isMatchModalOpen, setIsMatchModalOpen] = useState<boolean>(false);
-  const [userWatchlist, setUserWatchlist] = useState<string[]>([]);
+  const [userWatchlist, setUserWatchlist] = useState<string[] | null>(null);
   const [toastId, setToastId] = useState<string>("");
+  const { createMatch } = useMatchMutations();
   const { user } = useUser();
-  const leagues = useMemo(
-    () => user?.publicMetadata?.leagues || [],
-    [user?.publicMetadata?.leagues]
-  );
-  const ctx = api.useContext();
+  const { data: { league, stats, watchlist } = {} } =
+    api.league.getLeagueInfo.useQuery({
+      leagueId,
+    });
+  const userWatchlistMemoed = useMemo(() => watchlist || null, [watchlist]);
   const router = useRouter();
-  const createMatch = api.match.create.useMutation({
-    onMutate() {
-      const toastId = toast.loading("Processing request...");
-      setToastId(toastId);
-    },
-    onSettled: () => {
-      setToastId("");
-    },
-    onSuccess: () => {
-      toast.success("New match created", {
-        id: toastId,
-      });
-      void ctx.league.getLeagueInfo.invalidate();
-    },
-    onError: () => {
-      toast.error("Error while creating a new match", {
-        id: toastId,
-      });
-    },
-  });
 
   const setWatchlist = api.user.setWatchlist.useMutation({
     onMutate() {
@@ -76,19 +58,10 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   });
 
   useEffect(() => {
-    if (Array.isArray(leagues)) {
-      setUserWatchlist(leagues);
+    if (Array.isArray(watchlist)) {
+      setUserWatchlist(watchlist);
     }
-
-    console.log("rerender");
-  }, [leagues]);
-
-  const { data } = api.league.getLeagueInfo.useQuery({
-    leagueId,
-  });
-
-  const league = data?.league;
-  const stats = data?.stats;
+  }, [watchlist]);
 
   if (!league || !stats) return <div>Error while fetching league data</div>;
 
@@ -132,23 +105,25 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
           <h1 className="text-2xl font-semibold">
             {snakeToNormal(league.slug)}
           </h1>
-          <SignedIn>
-            {userWatchlist?.includes(league.id) ? (
-              <LogoButton
-                text="UNWATCH"
-                icon={<RiPlayListAddLine size={14} />}
-                className="flex items-center gap-2 rounded-full border-2 border-red-700 bg-red-600/20 px-4 py-1 text-xs hover:bg-red-600/40"
-                onClick={handleUnwatchLeague}
-              />
-            ) : (
-              <LogoButton
-                text="WATCH"
-                icon={<RiPlayListAddLine size={14} />}
-                className="flex items-center gap-2 rounded-full border-2 border-blue-700 bg-blue-600/20 px-4 py-1 text-xs hover:bg-blue-600/40"
-                onClick={handleWatchLeague}
-              />
-            )}
-          </SignedIn>
+          {userWatchlistMemoed && (
+            <SignedIn>
+              {userWatchlist?.includes(league.id) ? (
+                <LogoButton
+                  text="UNWATCH"
+                  icon={<RiPlayListAddLine size={14} />}
+                  className="flex items-center gap-2 rounded-full border-2 border-red-700 bg-red-600/20 px-4 py-1 text-xs hover:bg-red-600/40"
+                  onClick={handleUnwatchLeague}
+                />
+              ) : (
+                <LogoButton
+                  text="WATCH"
+                  icon={<RiPlayListAddLine size={14} />}
+                  className="flex items-center gap-2 rounded-full border-2 border-blue-700 bg-blue-600/20 px-4 py-1 text-xs hover:bg-blue-600/40"
+                  onClick={handleWatchLeague}
+                />
+              )}
+            </SignedIn>
+          )}
         </div>
 
         <div className="flex flex-col justify-between xl:flex-row">

@@ -1,3 +1,4 @@
+import { users } from "@clerk/nextjs/dist/api";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -55,8 +56,15 @@ export const leagueRouter = createTRPCRouter({
         });
       }
 
+      let watchlist: string[] | null = null;
+
+      if (ctx.userId) {
+        watchlist = (await users.getUser(ctx.userId)).publicMetadata
+          .leagues as string[];
+      }
+
       const stats: LeagueStats[] = getLeagueStats(league);
 
-      return { league, stats };
+      return { league, stats, watchlist };
     }),
 });

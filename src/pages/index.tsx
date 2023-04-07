@@ -93,15 +93,16 @@ const Home: NextPage = () => {
           <SignedIn>
             <div className="flex flex-col gap-1 pt-4">
               <h1>Watchlist</h1>
-              {watchlist?.map((item: string) => (
-                <Link
-                  key={`watchlist_item_${item}`}
-                  href={`/league/${item}`}
-                  className="w-min text-sm text-blue-600 hover:underline"
-                >
-                  {item}
-                </Link>
-              ))}
+              {watchlist &&
+                watchlist.map((item: string) => (
+                  <Link
+                    key={`watchlist_item_${item}`}
+                    href={`/league/${item}`}
+                    className="w-min text-sm text-blue-600 hover:underline"
+                  >
+                    {item}
+                  </Link>
+                ))}
             </div>
           </SignedIn>
         </div>

@@ -19,11 +19,10 @@ export const userRouter = createTRPCRouter({
     }),
   getUserWatchlist: publicProcedure.query(async ({ ctx }) => {
     if (ctx.userId) {
-      const watchlist = (await users.getUser(ctx.userId)).publicMetadata[
-        "leagues"
-      ];
+      const watchlist = (await users.getUser(ctx.userId)).publicMetadata
+        .leagues as string[];
 
-      return watchlist;
+      return watchlist || [];
     }
 
     return [];
