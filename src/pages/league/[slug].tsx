@@ -3,7 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { RiPlayListAddLine } from "react-icons/ri";
 import { Layout } from "~/components/Layout/Layout";
@@ -29,12 +29,11 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const [toastId, setToastId] = useState<string>("");
   const { createMatch } = useMatchMutations();
   const { user } = useUser();
+  const router = useRouter();
   const { data: { league, stats, watchlist } = {} } =
     api.league.getLeagueInfo.useQuery({
       leagueId,
     });
-  const userWatchlistMemoed = useMemo(() => watchlist || null, [watchlist]);
-  const router = useRouter();
 
   const setWatchlist = api.user.setWatchlist.useMutation({
     onMutate() {
@@ -105,7 +104,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
           <h1 className="text-2xl font-semibold">
             {snakeToNormal(league.slug)}
           </h1>
-          {userWatchlistMemoed && (
+          {watchlist && (
             <SignedIn>
               {userWatchlist?.includes(league.id) ? (
                 <LogoButton
@@ -129,7 +128,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
         <div className="flex flex-col justify-between xl:flex-row">
           <div className="py-2 lg:pr-4">
             <TitleWithSub text="Standings" subtext="League player standings" />
-            <StandingsTable players={league?.players} />
+            <StandingsTable players={league.players} />
             <div className="ml-auto mt-2 flex gap-2">
               <LogoButton
                 text="Manage players"

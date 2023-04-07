@@ -1,4 +1,5 @@
 import { users } from "@clerk/nextjs/dist/api";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
@@ -18,13 +19,31 @@ export const userRouter = createTRPCRouter({
       return input.leagues;
     }),
   getUserWatchlist: publicProcedure.query(async ({ ctx }) => {
-    if (ctx.userId) {
-      const watchlist = (await users.getUser(ctx.userId)).publicMetadata
-        .leagues as string[];
-
-      return watchlist || [];
+    const userId = ctx.userId;
+    if (!userId) {
+      return [];
     }
 
-    return [];
+    const user = await users.getUser(userId);
+    const { publicMetadata: { leagues = [] } = {} } = user;
+
+    if (!Array.isArray(leagues)) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error while extracting watchlist data",
+      });
+    }
+
+    if (!leagues.length) {
+      return [];
+    }
+
+    const leaguesList = await ctx.prisma.league.findMany({
+      where: {
+        id: { in: leagues },
+      },
+    });
+
+    return leaguesList;
   }),
 });
