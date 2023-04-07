@@ -23,48 +23,66 @@ export type LeagueStats = {
   name: string;
 };
 
+type NullablePlayerWithMatch =
+  | (Player & {
+      matchesAsHomePlayer: Match[];
+      matchesAsAwayPlayer: Match[];
+    })
+  | null;
+
+type LeagueStatsObj = {
+  bestWinratePlayer: NullablePlayerWithMatch;
+  bestWinrate: number;
+  bestAvgGoalsPlayer: NullablePlayerWithMatch;
+  bestAvgGoals: number;
+  bestAvgGoalsAgainstPlayer: NullablePlayerWithMatch;
+  bestAvgGoalsAgainst: number;
+};
+
 export const getLeagueStats = (league: CompleteLeague) => {
-  let bestWinratePlayer = null;
-  let bestWinrate = 0;
-  let bestAvgGoalsPlayer = null;
-  let bestAvgGoals = 0;
-  let bestAvgGoalsAgainstPlayer = null;
-  let bestAvgGoalsAgainst = Infinity;
+  const stats: LeagueStatsObj = {
+    bestWinratePlayer: null,
+    bestWinrate: 0,
+    bestAvgGoalsPlayer: null,
+    bestAvgGoals: 0,
+    bestAvgGoalsAgainstPlayer: null,
+    bestAvgGoalsAgainst: Infinity,
+  };
 
   for (const player of league.players) {
     const { winrate, avgGoalsScored, avgGoalsScoredAgainst } =
       getPlayerScore(player);
 
-    if (winrate > bestWinrate) {
-      bestWinrate = winrate;
-      bestWinratePlayer = player;
+    if (winrate > stats.bestWinrate) {
+      stats.bestWinrate = winrate;
+      stats.bestWinratePlayer = player;
     }
 
-    if (avgGoalsScored > bestAvgGoals) {
-      bestAvgGoals = avgGoalsScored;
-      bestAvgGoalsPlayer = player;
+    if (avgGoalsScored > stats.bestAvgGoals) {
+      stats.bestAvgGoals = avgGoalsScored;
+      stats.bestAvgGoalsPlayer = player;
     }
 
-    if (avgGoalsScoredAgainst < bestAvgGoalsAgainst) {
-      bestAvgGoalsAgainst = avgGoalsScoredAgainst;
-      bestAvgGoalsAgainstPlayer = player;
+    if (avgGoalsScoredAgainst < stats.bestAvgGoalsAgainst) {
+      stats.bestAvgGoalsAgainst = avgGoalsScoredAgainst;
+      stats.bestAvgGoalsAgainstPlayer = player;
     }
   }
 
   return [
     {
-      player: bestWinratePlayer,
-      stat: bestWinrate.toFixed(2) + "%",
+      player: stats.bestWinratePlayer,
+      stat: stats.bestWinrate.toFixed(2) + "%",
       name: "Winrate",
     },
     {
-      player: bestAvgGoalsPlayer,
-      stat: bestAvgGoals.toFixed(2),
+      player: stats.bestAvgGoalsPlayer,
+      stat: stats.bestAvgGoals.toFixed(2),
       name: "Best average G",
     },
     {
-      player: bestAvgGoalsAgainstPlayer,
-      stat: bestAvgGoalsAgainst.toFixed(2),
+      player: stats.bestAvgGoalsAgainstPlayer,
+      stat: stats.bestAvgGoalsAgainst.toFixed(2),
       name: "Best average GA",
     },
   ];
