@@ -1,12 +1,14 @@
 import React from "react";
+import { type PlayerWithMatches } from "~/types/leagueTypes";
+import { StandingsTablePlayer } from "../League/StandingsTablePlayer";
 
 type StandingsTableProps = {
-  players: string[];
+  players: PlayerWithMatches[];
 };
 
 export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
   return (
-    <div className="relative max-w-[35rem] overflow-x-auto rounded-md">
+    <div className="relative max-w-[36rem] overflow-x-auto rounded-md">
       <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
         <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-neutral-900 dark:text-gray-400">
           <tr>
@@ -19,7 +21,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
             <th scope="col" className="px-6 py-3">
               W/OTW/OTL/L
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-8 py-3">
               Score
             </th>
             <th scope="col" className="px-6 py-3">
@@ -28,24 +30,12 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
           </tr>
         </thead>
         <tbody>
-          {players.map((player) => (
-            <tr
-              key={player}
-              className="border-b bg-white dark:border-neutral-900 dark:bg-neutral-800"
-            >
-              <td className="px-6 py-2">1</td>
-              <th
-                scope="row"
-                className="flex gap-2 whitespace-nowrap px-6 py-2 font-medium text-gray-900 dark:text-white"
-              >
-                {player}
-              </th>
-              <td className="px-6 py-2">10/5/2/1</td>
-              <td className="px-6 py-2">50-18</td>
-              <td className="text-ellipsis-white px-6 py-2 font-semibold text-white">
-                1000
-              </td>
-            </tr>
+          {players.map((player, index) => (
+            <StandingsTablePlayer
+              key={`standing_player_${player.id}`}
+              player={player}
+              placement={index}
+            />
           ))}
         </tbody>
       </table>

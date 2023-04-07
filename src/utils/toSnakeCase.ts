@@ -6,3 +6,9 @@ export function toSnakeCase(str: string): string {
     .replace(/^_/, "")
     .replace(/_$/, "");
 }
+
+export function snakeToNormal(text: string) {
+  return text
+    .replace(/_/g, " ")
+    .replace(/(?:^|\s)\S/g, (match) => match.toUpperCase());
+}

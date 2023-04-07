@@ -17,6 +17,8 @@ model Player {
     mmr           Int      @default(1000)
     league        League   @relation(fields: [leagueId], references: [id])
     leagueId      String
+    matchesAsHomePlayer Match[] @relation("homePlayer")
+    matchesAsAwayPlayer Match[] @relation("awayPlayer")
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
     deleted       Boolean  @default(false)
@@ -29,7 +31,27 @@ model League {
     slug          String   @unique
     ownerClerkId  String 
     players       Player[]
+    matches       Match[]  @relation("leagueMatches")
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
+}
+
+model Match {
+    id            String   @id @default(cuid())
+    homePlayerId  String
+    awayPlayerId  String
+    homeScore     Int
+    awayScore     Int
+    homePlayer    Player   @relation("homePlayer", fields: [homePlayerId], references: [id])
+    awayPlayer    Player   @relation("awayPlayer", fields: [awayPlayerId], references: [id])
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    league        League   @relation("leagueMatches", fields: [leagueId], references: [id])
+    leagueId      String
+    overtime      Boolean
+
+    @@index([awayPlayerId])
+    @@index([homePlayerId])
+    @@index([leagueId])
 }
 

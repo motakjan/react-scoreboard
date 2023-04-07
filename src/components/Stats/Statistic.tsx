@@ -12,10 +12,10 @@ export const Statistic: React.FC<StatisticProps> = ({
   score,
 }) => {
   return (
-    <div className="flex w-48 flex-col items-center bg-neutral-900 px-4 py-2">
+    <div className="flex w-full flex-col bg-neutral-900 px-4 py-2 md:w-52">
       <h1>{statName}</h1>
       <h2>{playerName}</h2>
-      <h2 className="text-bold text-3xl">{score}</h2>
+      <h2 className="text-3xl font-semibold text-blue-400">{score}</h2>
     </div>
   );
 };
