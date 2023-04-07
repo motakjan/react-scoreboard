@@ -1,12 +1,16 @@
-import { UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { VscSignIn } from "react-icons/vsc";
+import { LogoButton } from "../UI/buttons";
+import { ProfileSkeleton } from "../UI/skeletons";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const { slug } = router.query;
 
@@ -34,7 +38,7 @@ const Navbar = () => {
             />
           </div>
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-4">
               {links.map((link) => (
                 <Link
                   href={link.href}
@@ -45,7 +49,22 @@ const Navbar = () => {
                 </Link>
               ))}
 
-              <UserButton showName />
+              {!isLoaded && <ProfileSkeleton />}
+              {isSignedIn ? (
+                <span className="flex items-center gap-2 font-medium text-white">
+                  <UserButton showName />
+                </span>
+              ) : (
+                <>
+                  <SignInButton mode="modal">
+                    <LogoButton
+                      text="Sign In"
+                      icon={<VscSignIn size={20} />}
+                      className="mr-2 inline-flex items-center gap-2 text-center text-sm font-medium text-white focus:outline-none"
+                    />
+                  </SignInButton>
+                </>
+              )}
             </div>
           </div>
           <div className="-mr-2 flex md:hidden">

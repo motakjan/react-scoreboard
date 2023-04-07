@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { RiPlayListAddLine } from "react-icons/ri";
 import { Layout } from "~/components/Layout/Layout";
 import { MatchInfo } from "~/components/Matches/Match";
 import { Statistic } from "~/components/Stats/Statistic";
@@ -14,6 +15,7 @@ import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
 import { api } from "~/utils/api";
 import { generateSSGHelper } from "~/utils/ssgHelper";
+import { snakeToNormal } from "~/utils/toSnakeCase";
 
 type LeaguePageProps = {
   leagueId: string;
@@ -71,6 +73,18 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
+        <div className="mb-2 flex items-center gap-4">
+          <h1 className="text-2xl font-semibold">
+            {snakeToNormal(league.slug)}
+          </h1>
+          <LogoButton
+            text="WATCH"
+            icon={<RiPlayListAddLine size={14} />}
+            className="flex items-center gap-2 rounded-full border-2 border-blue-700 bg-blue-600/20 px-4 py-1 text-xs hover:bg-blue-600/40"
+            onClick={() => setIsMatchModalOpen(true)}
+          />
+        </div>
+
         <div className="flex flex-col justify-between xl:flex-row">
           <div className="py-2 lg:pr-4">
             <TitleWithSub text="Standings" subtext="League player standings" />
