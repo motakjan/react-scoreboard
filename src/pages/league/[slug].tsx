@@ -44,9 +44,12 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
       });
     },
   });
-  const { data: league } = api.league.getLeagueInfo.useQuery({
+  const { data } = api.league.getLeagueInfo.useQuery({
     leagueId,
   });
+
+  const league = data?.league;
+  const stats = data?.stats;
 
   if (!league) return <div>Error while fetching league data</div>;
 
@@ -68,8 +71,8 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <div className="flex justify-between">
-          <div className="max-w-fit">
+        <div className="flex flex-col justify-between xl:flex-row">
+          <div className="py-2 pr-4">
             <TitleWithSub text="Standings" subtext="League player standings" />
             <StandingsTable players={league?.players} />
             <div className="ml-auto mt-2 flex gap-2">
@@ -85,17 +88,20 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
               />
             </div>
           </div>
-          <div className="max-w-fit">
+          <div className="py-2 md:px-4">
             <TitleWithSub text="Stats" subtext="League statistics by player" />
             <div className="flex flex-wrap gap-2">
-              <Statistic
-                statName="Winrate"
-                playerName="Jan Motak"
-                score="74%"
-              />
+              {stats?.map((stat) => (
+                <Statistic
+                  key={`${stat.name}`}
+                  statName={stat.name}
+                  playerName={stat.player?.name || ""}
+                  score={stat.stat}
+                />
+              ))}
             </div>
           </div>
-          <div className="max-w-fit">
+          <div className="py-2 md:w-96 md:px-4">
             <TitleWithSub text="Matches" subtext="Latest matches played" />
             <div className="flex flex-col gap-2">
               {league.matches.slice(0, 5).map((match) => (

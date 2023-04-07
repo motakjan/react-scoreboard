@@ -6,6 +6,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { getLeagueStats, type LeagueStats } from "~/server/helpers/leagueStats";
 
 export const leagueRouter = createTRPCRouter({
   create: privateProcedure
@@ -54,6 +55,12 @@ export const leagueRouter = createTRPCRouter({
         });
       }
 
-      return league;
+      if (league.matches.length > 0) {
+        const stats: LeagueStats[] = getLeagueStats(league);
+
+        return { league, stats };
+      }
+
+      return { league };
     }),
 });

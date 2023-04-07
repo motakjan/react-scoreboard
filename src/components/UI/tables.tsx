@@ -8,7 +8,7 @@ type StandingsTableProps = {
 
 export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
   return (
-    <div className="relative max-w-[35rem] overflow-x-auto rounded-md">
+    <div className="relative max-w-[36rem] overflow-x-auto rounded-md">
       <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
         <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-neutral-900 dark:text-gray-400">
           <tr>
@@ -21,7 +21,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ players }) => {
             <th scope="col" className="px-6 py-3">
               W/OTW/OTL/L
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-8 py-3">
               Score
             </th>
             <th scope="col" className="px-6 py-3">

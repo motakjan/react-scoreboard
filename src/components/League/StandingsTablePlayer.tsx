@@ -11,14 +11,14 @@ export const StandingsTablePlayer: React.FC<StandingsTablePlayerProps> = ({
   player,
   placement,
 }) => {
-  const [
+  const {
     goalsScored,
     goalsScoredAgainst,
     regularWins,
     otWins,
     regularLosses,
-    otLoses,
-  ] = getPlayerScore(player);
+    otLosses,
+  } = getPlayerScore(player);
 
   return (
     <tr
@@ -33,7 +33,7 @@ export const StandingsTablePlayer: React.FC<StandingsTablePlayerProps> = ({
         {player.name}
       </th>
       <td className="px-6 py-2">
-        {regularWins}-{otWins}-{otLoses}-{regularLosses}
+        {regularWins}-{otWins}-{otLosses}-{regularLosses}
       </td>
       <td className="px-6 py-2">
         {goalsScored}-{goalsScoredAgainst}

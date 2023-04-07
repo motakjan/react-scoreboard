@@ -36,22 +36,36 @@ export const getPlayerScore = (player: PlayerWithMatches) => {
     otWins: 0,
     regularLosses: 0,
     otLosses: 0,
+    gamesPlayed: 0,
   };
 
   for (const match of player.matchesAsHomePlayer) {
     processMatch(match, true, stats);
+    stats.gamesPlayed += 1;
   }
 
   for (const match of player.matchesAsAwayPlayer) {
     processMatch(match, false, stats);
+    stats.gamesPlayed += 1;
   }
 
-  return [
-    stats.goalsScored,
-    stats.goalsScoredAgainst,
-    stats.regularWins,
-    stats.otWins,
-    stats.regularLosses,
-    stats.otLosses,
-  ];
+  const totalWins = stats.regularWins + stats.otWins;
+  const totalLosses = stats.regularLosses + stats.otLosses;
+
+  const winrate = (totalWins / (totalWins + totalLosses)) * 100;
+
+  const avgGoalsScored = stats.goalsScored / stats.gamesPlayed;
+  const avgGoalsScoredAgainst = stats.goalsScoredAgainst / stats.gamesPlayed;
+
+  return {
+    goalsScored: stats.goalsScored,
+    goalsScoredAgainst: stats.goalsScoredAgainst,
+    regularWins: stats.regularWins,
+    otWins: stats.otWins,
+    regularLosses: stats.regularLosses,
+    otLosses: stats.otLosses,
+    winrate,
+    avgGoalsScored,
+    avgGoalsScoredAgainst,
+  };
 };

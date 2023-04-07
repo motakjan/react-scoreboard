@@ -7,6 +7,7 @@ export type Stats = {
   otWins: number;
   regularLosses: number;
   otLosses: number;
+  gamesPlayed: number;
 };
 
 export type PlayerWithMatches = Player & {
