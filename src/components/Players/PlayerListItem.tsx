@@ -1,3 +1,4 @@
+import { SignedIn } from "@clerk/nextjs";
 import React from "react";
 import { VscEdit, VscTrash } from "react-icons/vsc";
 import { IconButton } from "../UI/buttons";
@@ -24,18 +25,20 @@ export const PlayerListItem: React.FC<PlayerListItemProps> = ({
       {name}
       <span className="text-xs text-neutral-600">({mmr})</span>
       <span className="ml-auto flex gap-1">
-        <IconButton icon={<VscEdit size={16} />} onClick={() => onEdit(id)} />
-        <IconButton
-          icon={
-            <VscTrash
-              size={16}
-              className={`${
-                isInDelete ? "cursor-wait text-gray-600" : "text-red-600"
-              }`}
-            />
-          }
-          onClick={() => onDelete(id)}
-        />
+        <SignedIn>
+          <IconButton icon={<VscEdit size={16} />} onClick={() => onEdit(id)} />
+          <IconButton
+            icon={
+              <VscTrash
+                size={16}
+                className={`${
+                  isInDelete ? "cursor-wait text-gray-600" : "text-red-600"
+                }`}
+              />
+            }
+            onClick={() => onDelete(id)}
+          />
+        </SignedIn>
       </span>
     </div>
   );

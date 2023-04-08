@@ -130,16 +130,18 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
             <TitleWithSub text="Standings" subtext="League player standings" />
             <StandingsTable players={league.players} />
             <div className="ml-auto mt-2 flex gap-2">
-              <LogoButton
-                text="Manage players"
-                className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
-                onClick={() => router.push(`/players/${leagueId}`)}
-              />
-              <LogoButton
-                text="Add Match"
-                className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
-                onClick={() => setIsMatchModalOpen(true)}
-              />
+              <SignedIn>
+                <LogoButton
+                  text="Manage players"
+                  className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+                  onClick={() => router.push(`/players/${leagueId}`)}
+                />
+                <LogoButton
+                  text="Add Match"
+                  className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+                  onClick={() => setIsMatchModalOpen(true)}
+                />
+              </SignedIn>
             </div>
           </div>
           <div className="py-2 lg:px-4">
