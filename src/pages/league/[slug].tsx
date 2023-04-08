@@ -2,7 +2,6 @@ import { SignedIn, useUser } from "@clerk/nextjs";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { RiPlayListAddLine } from "react-icons/ri";
@@ -29,7 +28,6 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const [toastId, setToastId] = useState<string>("");
   const { createMatch } = useMatchMutations();
   const { user } = useUser();
-  const router = useRouter();
   const { data: { league, stats, watchlist } = {} } =
     api.league.getLeagueInfo.useQuery({
       leagueId,
@@ -131,11 +129,13 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
             <StandingsTable players={league.players} />
             <div className="ml-auto mt-2 flex gap-2">
               <SignedIn>
-                <LogoButton
-                  text="Manage players"
-                  className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
-                  onClick={() => router.push(`/players/${leagueId}`)}
-                />
+                <Link href={`/players/${leagueId}`}>
+                  <LogoButton
+                    text="Manage players"
+                    className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+                  />
+                </Link>
+
                 <LogoButton
                   text="Add Match"
                   className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
