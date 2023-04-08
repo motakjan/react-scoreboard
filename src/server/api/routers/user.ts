@@ -1,25 +1,25 @@
 import { users } from "@clerk/nextjs/dist/api";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { setWatchlistSchema } from "../schemas/userSchemas";
 
 export const userRouter = createTRPCRouter({
   setWatchlist: privateProcedure
-    .input(z.object({ userId: z.string(), leagues: z.array(z.string()) }))
-    .mutation(async ({ input }) => {
-      await users.updateUser(input.userId, {
-        publicMetadata: { leagues: input.leagues },
+    .input(setWatchlistSchema)
+    .mutation(async ({ input: { userId, leagues } }) => {
+      await users.updateUser(userId, {
+        publicMetadata: { leagues },
       });
 
-      return input.leagues;
+      return leagues;
     }),
+
   getUserWatchlist: publicProcedure.query(async ({ ctx }) => {
-    const userId = ctx.userId;
+    const { userId } = ctx;
     if (!userId) {
       return [];
     }

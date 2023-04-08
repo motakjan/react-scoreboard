@@ -1,6 +1,5 @@
 import { users } from "@clerk/nextjs/dist/api";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import {
   createTRPCRouter,
@@ -8,22 +7,29 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getLeagueStats, type LeagueStats } from "~/server/helpers/leagueStats";
+import {
+  createLeagueSchema,
+  getLeagueInfoSchema,
+} from "../schemas/leagueSchemas";
 
 export const leagueRouter = createTRPCRouter({
   create: privateProcedure
-    .input(z.object({ slug: z.string() }))
-    .mutation(({ ctx, input }) => {
+    .input(createLeagueSchema)
+    .mutation(({ ctx, input: { slug } }) => {
+      const { userId } = ctx;
+
       const league = ctx.prisma.league.create({
-        data: { ownerClerkId: ctx.userId, slug: input.slug },
+        data: { ownerClerkId: userId, slug },
       });
 
       return league;
     }),
+
   getLeagueInfo: publicProcedure
-    .input(z.object({ leagueId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .input(getLeagueInfoSchema)
+    .query(async ({ ctx, input: { leagueId } }) => {
       const league = await ctx.prisma.league.findUnique({
-        where: { id: input.leagueId },
+        where: { id: leagueId },
         include: {
           players: {
             orderBy: { mmr: "desc" },
@@ -56,12 +62,10 @@ export const leagueRouter = createTRPCRouter({
         });
       }
 
-      let watchlist: string[] | null = null;
-
-      if (ctx.userId) {
-        watchlist = (await users.getUser(ctx.userId)).publicMetadata
-          .leagues as string[];
-      }
+      const { userId } = ctx;
+      const watchlist = userId
+        ? ((await users.getUser(userId)).publicMetadata.leagues as string[])
+        : null;
 
       const stats: LeagueStats[] = getLeagueStats(league);
 
