@@ -8,6 +8,7 @@ type PlayerListItemProps = {
   onEdit: (playerId: string) => void;
   onDelete: (playerId: string) => void;
   id: string;
+  isInDelete: boolean;
 };
 
 export const PlayerListItem: React.FC<PlayerListItemProps> = ({
@@ -16,6 +17,7 @@ export const PlayerListItem: React.FC<PlayerListItemProps> = ({
   mmr,
   onEdit,
   onDelete,
+  isInDelete,
 }) => {
   return (
     <div className="flex items-center gap-2 bg-neutral-900 px-4 py-2">
@@ -24,7 +26,14 @@ export const PlayerListItem: React.FC<PlayerListItemProps> = ({
       <span className="ml-auto flex gap-1">
         <IconButton icon={<VscEdit size={16} />} onClick={() => onEdit(id)} />
         <IconButton
-          icon={<VscTrash size={16} className="text-red-500" />}
+          icon={
+            <VscTrash
+              size={16}
+              className={`${
+                isInDelete ? "cursor-wait text-gray-600" : "text-red-600"
+              }`}
+            />
+          }
           onClick={() => onDelete(id)}
         />
       </span>

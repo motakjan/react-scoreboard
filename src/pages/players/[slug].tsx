@@ -19,6 +19,7 @@ type PlayersPageProps = {
 const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
   const [editedPlayerId, setEditedPlayerId] = useState<string>("");
+  const [deletedPlayerIds, setDeletedPlayerIds] = useState<string[]>([]);
   const { updatePlayer, createPlayer, deletePlayer } = usePlayerMutations();
 
   const { data: players } = api.player.getPlayersByLeagueId.useQuery({
@@ -59,6 +60,7 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
   };
 
   const handleDeletePlayer = (playerId: string) => {
+    setDeletedPlayerIds((prevUsers) => [...prevUsers, playerId]);
     deletePlayer.mutate({ id: playerId });
   };
 
@@ -85,6 +87,7 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
           players={players}
           onEdit={handleEditPlayerClick}
           onDelete={handleDeletePlayer}
+          deletedPlayerIds={deletedPlayerIds}
         />
         <LogoButton
           text="Add player"
