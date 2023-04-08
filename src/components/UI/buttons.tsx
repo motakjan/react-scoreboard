@@ -14,7 +14,7 @@ type LogoButtonProps = {
 
 type IconButtonProps = {
   icon: JSX.Element;
-  onClick: () => void;
+  onClick: () => void | undefined;
   className?: string;
 };
 

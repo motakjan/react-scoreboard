@@ -1,21 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import { calculateNewMMR } from "../../helpers/elo";
 
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import { createMatchSchema } from "../schemas/matchSchemas";
 
 export const matchRouter = createTRPCRouter({
   create: privateProcedure
-    .input(
-      z.object({
-        leagueId: z.string(),
-        homePlayerId: z.string(),
-        awayPlayerId: z.string(),
-        homeScore: z.number(),
-        awayScore: z.number(),
-        overtime: z.boolean(),
-      })
-    )
+    .input(createMatchSchema)
     .mutation(async ({ ctx, input }) => {
       const {
         leagueId,
@@ -37,15 +28,11 @@ export const matchRouter = createTRPCRouter({
         });
       }
 
-      const homePlayer = await ctx.prisma.player.findUnique({
-        where: { id: homePlayerId },
+      const [homePlayer, awayPlayer] = await ctx.prisma.player.findMany({
+        where: { id: { in: [homePlayerId, awayPlayerId] } },
       });
 
-      const awayPlayer = await ctx.prisma.player.findUnique({
-        where: { id: awayPlayerId },
-      });
-
-      if (!homePlayer || !awayPlayer) {
+      if (!homePlayer || !awayPlayer || homePlayer.id === awayPlayer.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "One of the players not found",
@@ -66,31 +53,31 @@ export const matchRouter = createTRPCRouter({
         });
       }
 
-      const match = ctx.prisma.match.create({
-        data: {
-          leagueId,
-          homePlayerId,
-          awayPlayerId,
-          homeScore,
-          awayScore,
-          overtime,
-        },
-      });
+      const result = await ctx.prisma.$transaction([
+        ctx.prisma.match.create({
+          data: {
+            leagueId,
+            homePlayerId,
+            awayPlayerId,
+            homeScore,
+            awayScore,
+            overtime,
+          },
+        }),
+        ctx.prisma.player.update({
+          where: { id: homePlayerId },
+          data: {
+            mmr: Math.round(homeNewRating),
+          },
+        }),
+        ctx.prisma.player.update({
+          where: { id: awayPlayerId },
+          data: {
+            mmr: Math.round(awayNewRating),
+          },
+        }),
+      ]);
 
-      await ctx.prisma.player.update({
-        where: { id: homePlayerId },
-        data: {
-          mmr: Math.round(homeNewRating),
-        },
-      });
-
-      await ctx.prisma.player.update({
-        where: { id: awayPlayerId },
-        data: {
-          mmr: Math.round(awayNewRating),
-        },
-      });
-
-      return match;
+      return result[0];
     }),
 });

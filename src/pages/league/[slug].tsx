@@ -58,7 +58,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
 
   useEffect(() => {
     if (Array.isArray(watchlist)) {
-      setUserWatchlist(watchlist);
+      setUserWatchlist((prevWatchlist) => watchlist || prevWatchlist);
     }
   }, [watchlist]);
 

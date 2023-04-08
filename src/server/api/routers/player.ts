@@ -1,24 +1,21 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  createPlayerSchema,
+  deletePlayerSchema,
+  getPlayersByLeagueSchema,
+  updatePlayerSchema,
+} from "../schemas/playerSchemas";
 
 export const playerRouter = createTRPCRouter({
   create: privateProcedure
-    .input(
-      z.object({
-        leagueId: z.string(),
-        mmr: z.number().min(0).max(8000),
-        name: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { leagueId, name, mmr } = input;
-
+    .input(createPlayerSchema)
+    .mutation(async ({ ctx, input: { leagueId, name, mmr } }) => {
       const league = await ctx.prisma.league.findUnique({
         where: { id: leagueId },
       });
@@ -37,19 +34,13 @@ export const playerRouter = createTRPCRouter({
       return player;
     }),
   update: privateProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        mmr: z.number().min(0).max(8000),
-        name: z.string(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
+    .input(updatePlayerSchema)
+    .mutation(async ({ ctx, input: { id, name, mmr } }) => {
       const player = await ctx.prisma.player.update({
-        where: { id: input.id },
+        where: { id },
         data: {
-          name: input.name,
-          mmr: input.mmr,
+          name,
+          mmr,
         },
       });
 
@@ -63,10 +54,10 @@ export const playerRouter = createTRPCRouter({
       return player;
     }),
   delete: privateProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .input(deletePlayerSchema)
+    .mutation(async ({ ctx, input: { id } }) => {
       const player = await ctx.prisma.player.update({
-        where: { id: input.id },
+        where: { id },
         data: { deleted: true },
       });
 
@@ -74,10 +65,10 @@ export const playerRouter = createTRPCRouter({
     }),
 
   getPlayersByLeagueId: publicProcedure
-    .input(z.object({ leagueId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .input(getPlayersByLeagueSchema)
+    .query(async ({ ctx, input: { leagueId } }) => {
       const league = await ctx.prisma.league.findUnique({
-        where: { id: input.leagueId },
+        where: { id: leagueId },
       });
 
       if (!league) {
@@ -88,7 +79,7 @@ export const playerRouter = createTRPCRouter({
       }
 
       const players = ctx.prisma.player.findMany({
-        where: { leagueId: input.leagueId, deleted: false },
+        where: { leagueId: leagueId, deleted: false },
       });
 
       return players;
