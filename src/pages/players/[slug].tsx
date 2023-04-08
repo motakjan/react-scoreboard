@@ -1,3 +1,4 @@
+import { SignedIn } from "@clerk/nextjs";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
@@ -89,11 +90,14 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
           onDelete={handleDeletePlayer}
           deletedPlayerIds={deletedPlayerIds}
         />
-        <LogoButton
-          text="Add player"
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
-          onClick={() => handleAddPlayerClick()}
-        />
+        <SignedIn>
+          <LogoButton
+            text="Add player"
+            className="rounded-md bg-neutral-900 px-4 py-2 text-sm"
+            onClick={() => handleAddPlayerClick()}
+          />
+        </SignedIn>
+
         {isPlayerModalOpen && (
           <Modal
             isOpen={isPlayerModalOpen}
