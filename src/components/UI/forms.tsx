@@ -1,6 +1,14 @@
 import type { Player } from "@prisma/client";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
+import type {
+  CreateLeagueValues,
+  MatchValues,
+  PlayerValues,
+} from "~/types/formTypes";
+import { FormCheck } from "../FormInputs/FormCheck";
+import { FormInput } from "../FormInputs/FormInput";
+import { FormSelect } from "../FormInputs/FormSelect";
 import { LogoButton } from "./buttons";
 
 type PlayerFormProps = {
@@ -15,18 +23,8 @@ type MatchFormProps = {
   players?: Player[];
 };
 
-export type PlayerValues = {
-  mmr: string;
-  name: string;
-  id?: string;
-};
-
-export type MatchValues = {
-  homePlayerId: string;
-  awayPlayerId: string;
-  homeScore: number;
-  awayScore: number;
-  overtime: boolean;
+type CreateLeagueFormProps = {
+  onSubmit: SubmitHandler<CreateLeagueValues>;
 };
 
 export const PlayerForm: React.FC<PlayerFormProps> = ({
@@ -52,67 +50,41 @@ export const PlayerForm: React.FC<PlayerFormProps> = ({
   const player = players?.find((player) => player.id === editedPlayerId);
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name">Name</label>
-        <input
-          className="rounded-md bg-neutral-800 px-3 py-2"
-          type="text"
-          defaultValue={isEditMode ? player?.name : ""}
-          placeholder="players first and last name"
-          {...register("name", { required: true })}
-        />
-        <span
-          className={`ml-[2px] text-xs text-red-600 ${
-            errors.name ? "visible" : "invisible"
-          }`}
-        >
-          This field is required
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="mmr">MMR</label>
-        <input
-          className="rounded-md bg-neutral-800 px-3 py-2"
-          type="number"
-          defaultValue={isEditMode ? player?.mmr : 1000}
-          placeholder="player mmr (default 1000)"
-          {...register("mmr", { required: true, min: 0, max: 8000 })}
-        />
-        {errors.mmr?.type === "required" && (
-          <span
-            className={`ml-[2px] text-xs text-red-600 ${
-              errors.mmr ? "visible" : "invisible"
-            }`}
-          >
-            This field is required
-          </span>
-        )}
-        {errors.mmr?.type === "min" && (
-          <span
-            className={`ml-[2px] text-xs text-red-600 ${
-              errors.mmr ? "visible" : "invisible"
-            }`}
-          >
-            MMR must be greater than or equal to 0
-          </span>
-        )}
-        {errors.mmr?.type === "max" && (
-          <span
-            className={`ml-[2px] text-xs text-red-600 ${
-              errors.mmr ? "visible" : "invisible"
-            }`}
-          >
-            MMR must be less than or equal to 8000
-          </span>
-        )}
-      </div>
-
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-1"
+    >
+      <FormInput
+        label="Name"
+        name="name"
+        placeholder="player name"
+        error={errors?.name}
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "MMR is required" },
+        }}
+      />
+      <FormInput
+        label="MMR"
+        name="mmr"
+        placeholder="player mmr"
+        error={errors?.mmr}
+        defaultValue={1000}
+        type="number"
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "MMR is required" },
+          min: { value: 1, message: "MMR must be greater than or equal to 1" },
+          max: {
+            value: 10000,
+            message: "MMR must be lesser or equal than 10000",
+          },
+        }}
+      />
       <LogoButton
         text={isEditMode ? "Update player" : "Create player"}
         type="submit"
-        className="ml-auto mt-4 w-28 rounded-md bg-red-600 px-2 py-2 text-sm"
+        className="ml-auto mt-4 w-28 rounded-md bg-blue-600 px-2 py-2 text-sm"
       />
     </form>
   );
@@ -139,120 +111,110 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSubmit, players }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name">Home Player</label>
-        <select
-          {...register("homePlayerId", { required: true })}
-          className="rounded-md bg-neutral-800 px-3 py-2"
-        >
-          {players?.map((player) => (
-            <option key={`homePlayer_${player.id}`} value={player.id}>
-              {player.name}
-            </option>
-          ))}
-        </select>
-        <span
-          className={`ml-[2px] text-xs text-red-600 ${
-            errors.homePlayerId ? "visible" : "invisible"
-          }`}
-        >
-          This field is required
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name">Away Player</label>
-        <select
-          {...register("awayPlayerId", { required: true })}
-          className="rounded-md bg-neutral-800 px-3 py-2"
-        >
-          {players?.map((player) => (
-            <option key={`awayPlayer_${player.id}`} value={player.id}>
-              {player.name}
-            </option>
-          ))}
-        </select>
-        <span
-          className={`ml-[2px] text-xs text-red-600 ${
-            errors.awayPlayerId ? "visible" : "invisible"
-          }`}
-        >
-          This field is required
-        </span>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name">Home Player Score</label>
-        <input
-          type="number"
-          placeholder="home player score"
-          {...register("homeScore", { required: true, min: 0 })}
-          className="rounded-md bg-neutral-800 px-3 py-2"
-        />
-        <span
-          className={`ml-[2px] text-xs text-red-600 ${
-            errors.homeScore ? "visible" : "invisible"
-          }`}
-        >
-          This field is required
-        </span>
-        {errors.homeScore?.type === "min" && (
-          <span
-            className={`ml-[2px] text-xs text-red-600 ${
-              errors.homeScore ? "visible" : "invisible"
-            }`}
-          >
-            Score must be larger or equal to zero
-          </span>
-        )}
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name">Away Player Score</label>
-        <input
-          type="number"
-          placeholder="away player score"
-          {...register("awayScore", { required: true, min: 0 })}
-          className="rounded-md bg-neutral-800 px-3 py-2"
-        />
-        <span
-          className={`ml-[2px] text-xs text-red-600 ${
-            errors.awayScore ? "visible" : "invisible"
-          }`}
-        >
-          This field is required
-        </span>
-        {errors.awayScore?.type === "min" && (
-          <span
-            className={`ml-[2px] text-xs text-red-600 ${
-              errors.awayScore ? "visible" : "invisible"
-            }`}
-          >
-            Score must be larger or equal to zero
-          </span>
-        )}
-      </div>
-      <div className="flex flex-col gap-1">
-        <div className="mb-4 flex items-center">
-          <input
-            id="default-checkbox"
-            type="checkbox"
-            placeholder="Overtime"
-            {...register("overtime", {})}
-            value=""
-            className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-          />
-          <label
-            htmlFor="default-checkbox"
-            className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-          >
-            Overtime/Shootout
-          </label>
-        </div>
-      </div>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-1"
+    >
+      <FormSelect
+        label="Home Player"
+        name="homePlayerId"
+        error={errors?.homePlayerId}
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "Home player is required" },
+        }}
+        players={players}
+      />
+      <FormSelect
+        label="Away Player"
+        name="awayPlayerId"
+        error={errors?.awayPlayerId}
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "Away player is required" },
+        }}
+        players={players}
+      />
+      <FormInput
+        label="Home Player Score"
+        name="homeScore"
+        placeholder="home player score"
+        error={errors?.homeScore}
+        type="number"
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "Home score is required" },
+          min: { value: 0, message: "Home score has to be larger then 0" },
+        }}
+      />
+      <FormInput
+        label="Away Player Score"
+        name="awayScore"
+        placeholder="away player score"
+        error={errors?.homeScore}
+        type="number"
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "Away score is required" },
+          min: { value: 0, message: "Away score has to be larger then 0" },
+        }}
+      />
+      <FormCheck
+        label="Overtime/Shootout"
+        name="overtime"
+        register={register}
+      />
       <LogoButton
         text="Create Match"
         type="submit"
-        className="ml-auto mt-4 w-28 rounded-md bg-red-600 px-2 py-2 text-sm"
+        className="ml-auto mt-4 w-28 rounded-md bg-blue-600 px-2 py-2 text-sm"
+      />
+    </form>
+  );
+};
+
+export const CreateLeagueForm: React.FC<CreateLeagueFormProps> = ({
+  onSubmit,
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateLeagueValues>();
+
+  const handleFormSubmit: SubmitHandler<CreateLeagueValues> = (
+    data: CreateLeagueValues,
+    event?: React.BaseSyntheticEvent
+  ) => {
+    event?.preventDefault();
+    onSubmit(data);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-1"
+    >
+      <FormInput
+        label="League name"
+        name="leagueName"
+        placeholder="League name"
+        error={errors?.leagueName}
+        register={register}
+        registerOptions={{
+          required: { value: true, message: "League name is required" },
+          maxLength: { value: 45, message: "Maximum league name length is 45" },
+        }}
+      />
+      <FormCheck
+        label="Set private (invite only)"
+        name="isPrivate"
+        register={register}
+      />
+      <LogoButton
+        text="Create league"
+        type="submit"
+        className="ml-auto mt-4 w-28 rounded-md bg-blue-600 px-2 py-2 text-sm"
       />
     </form>
   );

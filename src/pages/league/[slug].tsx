@@ -5,15 +5,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { RiPlayListAddLine } from "react-icons/ri";
+import { ErrorPage } from "~/components/404Content/404Content";
 import { Layout } from "~/components/Layout/Layout";
 import { MatchInfo } from "~/components/Matches/Match";
 import { Statistic } from "~/components/Stats/Statistic";
 import { LogoButton } from "~/components/UI/buttons";
-import { MatchForm, type MatchValues } from "~/components/UI/forms";
+import { MatchForm } from "~/components/UI/forms";
 import Modal from "~/components/UI/modals";
 import { StandingsTable } from "~/components/UI/tables";
 import { TitleWithSub } from "~/components/UI/titles";
 import { useMatchMutations } from "~/hooks/useMatchMutations";
+import { type MatchValues } from "~/types/formTypes";
 import { api } from "~/utils/api";
 import { generateSSGHelper } from "~/utils/ssgHelper";
 import { snakeToNormal } from "~/utils/toSnakeCase";
@@ -26,9 +28,9 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
   const [isMatchModalOpen, setIsMatchModalOpen] = useState<boolean>(false);
   const [userWatchlist, setUserWatchlist] = useState<string[] | null>(null);
   const [toastId, setToastId] = useState<string>("");
-  const { createMatch } = useMatchMutations();
   const { user } = useUser();
-  const { data: { league, stats, watchlist } = {} } =
+  const { createMatch } = useMatchMutations();
+  const { data: { league, stats, watchlist, allowedUsers } = {} } =
     api.league.getLeagueInfo.useQuery({
       leagueId,
     });
@@ -60,7 +62,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
     }
   }, [watchlist]);
 
-  if (!league || !stats) return <div>Error while fetching league data</div>;
+  if (!league || !stats || !allowedUsers) return <ErrorPage />;
 
   const handleCreateMatch = (matchData: MatchValues) => {
     createMatch.mutate({
@@ -97,7 +99,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
         <meta name="description" content="Scoreboard application" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
+      <Layout league={league} allowedUsers={allowedUsers}>
         <div className="mb-2 flex items-center gap-4">
           <h1 className="text-2xl font-semibold">
             {snakeToNormal(league.slug)}
@@ -124,7 +126,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
         </div>
 
         <div className="flex flex-col justify-between xl:flex-row">
-          <div className="py-2 lg:pr-4">
+          <div className="py-2 xl:pr-4">
             <TitleWithSub text="Standings" subtext="League player standings" />
             <StandingsTable players={league.players} />
             <div className="ml-auto mt-2 flex gap-2">
@@ -144,7 +146,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
               </SignedIn>
             </div>
           </div>
-          <div className="py-2 lg:px-4">
+          <div className="py-2 xl:px-4">
             <TitleWithSub text="Stats" subtext="League statistics by player" />
             <div className="flex flex-wrap gap-2">
               {stats.length > 0 ? (
@@ -164,7 +166,7 @@ const League: NextPage<LeaguePageProps> = ({ leagueId }) => {
               )}
             </div>
           </div>
-          <div className="py-2 md:w-96 lg:px-4">
+          <div className="py-2 md:w-96 xl:px-4">
             <TitleWithSub text="Matches" subtext="Latest matches played" />
             <div className="flex flex-col gap-2">
               {league.matches.slice(0, 5).map((match) => (

@@ -10,19 +10,33 @@ import { getLeagueStats, type LeagueStats } from "~/server/helpers/leagueStats";
 import {
   createLeagueSchema,
   getLeagueInfoSchema,
+  getLeaguesByQuerySchema,
 } from "../schemas/leagueSchemas";
 
 export const leagueRouter = createTRPCRouter({
   create: privateProcedure
     .input(createLeagueSchema)
-    .mutation(({ ctx, input: { slug } }) => {
+    .mutation(({ ctx, input: { slug, isPrivate, name } }) => {
       const { userId } = ctx;
 
       const league = ctx.prisma.league.create({
-        data: { ownerClerkId: userId, slug },
+        data: { ownerClerkId: userId, slug, isPrivate, name },
       });
 
       return league;
+    }),
+
+  getLeaguesByQuery: publicProcedure
+    .input(getLeaguesByQuerySchema)
+    .query(({ ctx, input: { query } }) => {
+      const leagues = ctx.prisma.league.findMany({
+        where: {
+          name: { contains: query },
+        },
+        take: 5,
+      });
+
+      return leagues;
     }),
 
   getLeagueInfo: publicProcedure
@@ -69,6 +83,14 @@ export const leagueRouter = createTRPCRouter({
 
       const stats: LeagueStats[] = getLeagueStats(league);
 
-      return { league, stats, watchlist };
+      let allowedUsers: string[] = [];
+
+      if (league.isPrivate && league.allowedUsers) {
+        allowedUsers = league.allowedUsers.split(",");
+      }
+
+      allowedUsers.push(league.ownerClerkId);
+
+      return { league, stats, watchlist, allowedUsers, userId: ctx.userId };
     }),
 });

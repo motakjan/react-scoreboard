@@ -54,7 +54,7 @@ const Navbar = () => {
               {!isLoaded && <ProfileSkeleton />}
               {isSignedIn ? (
                 <span className="flex items-center gap-2 font-medium text-white">
-                  <UserButton showName />
+                  <UserButton />
                 </span>
               ) : (
                 <>

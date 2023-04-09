@@ -6,10 +6,11 @@ import { toast } from "react-hot-toast";
 import { Layout } from "~/components/Layout/Layout";
 import { PlayerList } from "~/components/Players/PlayersList";
 import { LogoButton } from "~/components/UI/buttons";
-import { PlayerForm, type PlayerValues } from "~/components/UI/forms";
+import { PlayerForm } from "~/components/UI/forms";
 import Modal from "~/components/UI/modals";
 import { TitleWithSub } from "~/components/UI/titles";
 import { usePlayerMutations } from "~/hooks/usePlayerMutations";
+import { type PlayerValues } from "~/types/formTypes";
 import { api } from "~/utils/api";
 import { generateSSGHelper } from "~/utils/ssgHelper";
 
@@ -23,11 +24,13 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
   const [deletedPlayerIds, setDeletedPlayerIds] = useState<string[]>([]);
   const { updatePlayer, createPlayer, deletePlayer } = usePlayerMutations();
 
-  const { data: players } = api.player.getPlayersByLeagueId.useQuery({
-    leagueId,
-  });
+  const { data: { league, allowedUsers } = {} } =
+    api.league.getLeagueInfo.useQuery({
+      leagueId,
+    });
 
-  if (!players) return <div>Error while creating this page...</div>;
+  if (!league || !allowedUsers)
+    return <div>Error while creating this page...</div>;
 
   const handleCreateOrUpdatePlayer = (playerData: PlayerValues) => {
     if (editedPlayerId) {
@@ -82,10 +85,10 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
         <meta name="description" content="Scoreboard application" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
+      <Layout league={league} allowedUsers={allowedUsers}>
         <TitleWithSub text="Players" subtext="Manage league players" />
         <PlayerList
-          players={players}
+          players={league.players}
           onEdit={handleEditPlayerClick}
           onDelete={handleDeletePlayer}
           deletedPlayerIds={deletedPlayerIds}
@@ -106,7 +109,7 @@ const PlayersPage: NextPage<PlayersPageProps> = ({ leagueId }) => {
           >
             <PlayerForm
               onSubmit={handleCreateOrUpdatePlayer}
-              players={players}
+              players={league.players}
               editedPlayerId={editedPlayerId}
               isEditMode={Boolean(editedPlayerId)}
             />
@@ -124,7 +127,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   if (typeof slug !== "string") throw new Error("No slug");
 
-  await ssg.player.getPlayersByLeagueId.prefetch({ leagueId: slug });
+  await ssg.league.getLeagueInfo.prefetch({ leagueId: slug });
 
   return {
     props: {

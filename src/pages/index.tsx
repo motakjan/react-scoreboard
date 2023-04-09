@@ -1,25 +1,44 @@
-import { SignInButton, SignedIn, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignedIn,
+  UserButton,
+  useClerk,
+  useUser,
+} from "@clerk/nextjs";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { toast } from "react-hot-toast";
-import { VscAdd, VscSignIn } from "react-icons/vsc";
+import { VscLock, VscSignIn } from "react-icons/vsc";
+import { CreateLeagueForm } from "~/components/UI/forms";
+import Modal from "~/components/UI/modals";
 import { ProfileSkeleton } from "~/components/UI/skeletons";
+import useDebounce from "~/hooks/useDebounce";
+import { type CreateLeagueValues } from "~/types/formTypes";
 import { api } from "~/utils/api";
 import { toSnakeCase } from "~/utils/toSnakeCase";
 import { LogoButton } from "../components/UI/buttons";
-import { Input } from "../components/UI/inputs";
-import { Title } from "../components/UI/titles";
 
 const Home: NextPage = () => {
   const [toastId, setToastId] = useState<string>("");
-  const tournamentNameRef = useRef<HTMLInputElement>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const debouncedSearchValue = useDebounce<string>(searchValue, 500);
   const router = useRouter();
   const { user, isSignedIn, isLoaded } = useUser();
+  const { openSignIn } = useClerk();
   const { data: leagueWatchlist } = api.user.getUserWatchlist.useQuery();
+  const { data: resLeagues, refetch } = api.league.getLeaguesByQuery.useQuery(
+    {
+      query: debouncedSearchValue,
+    },
+    {
+      enabled: debouncedSearchValue !== "",
+    }
+  );
   const createLeague = api.league.create.useMutation({
     onMutate() {
       const toastId = toast.loading("Processing request...");
@@ -41,10 +60,24 @@ const Home: NextPage = () => {
     },
   });
 
-  const handleCreateTournament = () => {
-    const slug = toSnakeCase(tournamentNameRef.current?.value as string);
+  useEffect(() => {
+    if (debouncedSearchValue !== "") void refetch();
 
-    if (user) createLeague.mutate({ slug });
+    console.log("refetch");
+  }, [debouncedSearchValue, refetch]);
+
+  const handleCreateLeague = (leagueData: CreateLeagueValues) => {
+    const slug = toSnakeCase(leagueData.leagueName);
+    if (user)
+      createLeague.mutate({
+        slug,
+        isPrivate: leagueData.isPrivate,
+        name: leagueData.leagueName,
+      });
+  };
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
   };
 
   return (
@@ -54,52 +87,97 @@ const Home: NextPage = () => {
         <meta name="description" content="Scoreboard application" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col bg-black bg-hero-pattern bg-cover bg-center">
-        <div className="flex h-16 w-full justify-between bg-black/30 px-8 py-4 sm:px-16">
+      <main className="flex min-h-screen flex-col bg-gradient-to-br from-blue-200/80 via-slate-100 to-blue-200/90">
+        <nav className="absolute flex h-16 w-full justify-between bg-black/90 px-8 py-4 sm:px-16">
           <Image
             src="/images/logo.svg"
             alt="logo"
             width={100}
             height={30}
-            loading="lazy"
+            loading="eager"
           />
-          {!isLoaded && <ProfileSkeleton />}
-          {isSignedIn ? (
-            <span className="flex items-center gap-2 font-medium text-white">
-              <UserButton showName />
-            </span>
-          ) : (
-            <>
-              <SignInButton mode="modal">
-                <LogoButton
-                  text="Sign In"
-                  icon={<VscSignIn size={20} />}
-                  className="mr-2 inline-flex items-center gap-2 text-center text-sm font-medium text-white focus:outline-none"
-                />
-              </SignInButton>
-            </>
-          )}
+          <span className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                className="w-48 rounded-xl border-2 border-neutral-950/50 bg-neutral-900 px-2 py-1 text-white focus:ring-blue-500"
+                placeholder="lookup league"
+                value={searchValue}
+                autoComplete="off"
+                onChange={handleSearchChange}
+              />
+              <div className="absolute top-10 w-48 rounded-md bg-neutral-900 text-sm text-white">
+                {resLeagues?.map((league) => (
+                  <Link
+                    key={`search_${league.id}`}
+                    href={`/league/${league.id}`}
+                  >
+                    <div className="flex items-center justify-between break-all rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-800">
+                      <div className="w-4/5">{league.name}</div>
+
+                      {league.isPrivate && <VscLock size={12} />}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {!isLoaded && <ProfileSkeleton />}
+            {isSignedIn ? (
+              <span className="flex items-center gap-2 font-medium text-white">
+                <UserButton />
+              </span>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <LogoButton
+                    text="Sign In"
+                    icon={<VscSignIn size={20} />}
+                    className="mr-2 inline-flex items-center gap-2 text-center text-sm font-medium text-white focus:outline-none"
+                  />
+                </SignInButton>
+              </>
+            )}
+          </span>
+        </nav>
+        <div className="flex h-screen w-screen flex-col items-start justify-center text-black">
+          <div className="flex flex-col gap-8 px-16">
+            <h1 className="font-['Manrope'] text-6xl font-extrabold">
+              LET YOUR TOURNAMENT <br />
+              <span className="text-blue-600">JORNEY BEGIN</span>
+            </h1>
+            <p className="max-w-lg font-semibold text-slate-600">
+              Create your own gaming league, track player MMR, and organize
+              tournaments with ease on our platform.With our user-friendly
+              interface and advanced features, you will have everything you need
+              to create a fun and competitive gaming community. <br />
+              Sign up now to get started.
+            </p>
+            <LogoButton
+              text={isSignedIn ? "Start a new league" : "Sign in to start"}
+              onClick={
+                isSignedIn ? () => setIsCreateModalOpen(true) : openSignIn
+              }
+              className="text-md mr-2 inline-flex w-fit items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-center font-semibold text-white focus:outline-none"
+              loading={!isLoaded}
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-3 px-8 py-4 text-white sm:px-16">
-          <Title text="Create a league" />
-          <Input
-            label="League name"
-            prefix="SKRBRD.gg/"
-            ref={tournamentNameRef}
-          />
-          <LogoButton
-            text="Create a new league"
-            icon={<VscAdd size={20} />}
-            onClick={handleCreateTournament}
-            className="mr-2 inline-flex w-fit items-center gap-2 rounded-md bg-blue-600  px-3 py-2 text-center text-sm font-medium text-white focus:outline-none"
-            loading={!isLoaded}
-            disabled={!isSignedIn || toastId !== ""}
-          />
+        {isCreateModalOpen && (
+          <Modal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            title="Create league"
+          >
+            <CreateLeagueForm onSubmit={handleCreateLeague} />
+          </Modal>
+        )}
+        {false && (
           <SignedIn>
             <div className="flex flex-col gap-1 pt-4">
               <h1>Watchlist</h1>
               {leagueWatchlist &&
-                leagueWatchlist.map((item) => (
+                leagueWatchlist?.map((item) => (
                   <Link
                     key={`watchlist_item_${item.id}`}
                     href={`/league/${item.id}`}
@@ -110,7 +188,7 @@ const Home: NextPage = () => {
                 ))}
             </div>
           </SignedIn>
-        </div>
+        )}
       </main>
     </>
   );

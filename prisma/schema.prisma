@@ -29,9 +29,12 @@ model Player {
 model League {
     id            String   @id @default(cuid())
     slug          String   @unique
+    name          String 
     ownerClerkId  String 
     players       Player[]
+    isPrivate     Boolean
     matches       Match[]  @relation("leagueMatches")
+    allowedUsers  String   @db.VarChar(2500) @default("")
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 }

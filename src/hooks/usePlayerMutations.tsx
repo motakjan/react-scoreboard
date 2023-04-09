@@ -22,7 +22,7 @@ export const usePlayerMutations = () => {
       toast.success("Player successfully updated", {
         id: toastId,
       });
-      void ctx.player.getPlayersByLeagueId.invalidate();
+      void ctx.league.getLeagueInfo.invalidate();
     },
     onError: () => {
       toast.error("Error while updating player", {
@@ -37,7 +37,7 @@ export const usePlayerMutations = () => {
       toast.success("New player created", {
         id: toastId,
       });
-      void ctx.player.getPlayersByLeagueId.invalidate();
+      void ctx.league.getLeagueInfo.invalidate();
     },
     onError: () => {
       toast.error("Error while creating a new player", {
@@ -52,7 +52,7 @@ export const usePlayerMutations = () => {
       toast.success("Player deleted", {
         id: toastId,
       });
-      void ctx.player.getPlayersByLeagueId.invalidate();
+      void ctx.league.getLeagueInfo.invalidate();
     },
     onError: () => {
       toast.error("Error while deleting a player", {
