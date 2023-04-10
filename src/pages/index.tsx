@@ -39,7 +39,7 @@ const Home: NextPage = () => {
       query: debouncedSearchValue,
     },
     {
-      enabled: debouncedSearchValue !== "",
+      enabled: false,
     }
   );
   const createLeague = api.league.create.useMutation({

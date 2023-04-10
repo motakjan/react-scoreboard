@@ -8,3 +8,5 @@ export const createLeagueSchema = z.object({
 export const getLeagueInfoSchema = z.object({ leagueId: z.string() });
 
 export const getLeaguesByQuerySchema = z.object({ query: z.string() });
+
+export const sendEmailToOwnerSchema = z.object({ leagueId: z.string() });

@@ -6,11 +6,13 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { sendInvite } from "~/server/helpers/emailTransporter";
 import { getLeagueStats, type LeagueStats } from "~/server/helpers/leagueStats";
 import {
   createLeagueSchema,
   getLeagueInfoSchema,
   getLeaguesByQuerySchema,
+  sendEmailToOwnerSchema,
 } from "../schemas/leagueSchemas";
 
 export const leagueRouter = createTRPCRouter({
@@ -37,6 +39,14 @@ export const leagueRouter = createTRPCRouter({
       });
 
       return leagues;
+    }),
+
+  sendEmailToOwner: publicProcedure
+    .input(sendEmailToOwnerSchema)
+    .query(({ input: { leagueId } }) => {
+      void sendInvite("jan.motak@hotmail.cz", leagueId.toString());
+
+      return { success: true };
     }),
 
   getLeagueInfo: publicProcedure
